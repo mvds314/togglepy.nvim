@@ -1,0 +1,350 @@
+-- Stores the ipython terminal instance
+local ipy_term = nil
+-- Stores the preferred Python environment
+local current_python_env = nil
+-- Stores list with all Python environments
+local python_envs = nil
+-- Helpers for blinking text to be sent to the terminal
+local blink = require("util.blink")
+local helpers = require("util.helpers")
+-- Local variable to store preferred terminal direction
+local terminal_direction = "vertical"
+
+-- TODO:
+-- Fix bug, when term exits ipy_term is not cleared
+-- Create a mapping for debugging Python files with ipython
+-- Create mappings for debug keys: next step, continue, etc.
+-- Consider to add switching environment logic to Telescope as a plugin
+-- Put finding environments in a subprocess to avoid blocking Neovim
+-- Make logic for multiple ipython terminals
+
+local create_or_get_ipython_terminal = function(cmd)
+	local Terminal = require("toggleterm.terminal").Terminal
+	if not cmd then
+		local python_env = current_python_env or "python"
+		-- Ignore IPython warnings about running inside a virtual environment
+		cmd = string.format('"%s" -W "ignore:.*interactiveshell.py:UserWarning" -m IPython', python_env)
+	end
+	if not ipy_term then
+		ipy_term = Terminal:new({
+			cmd = cmd,
+			hidden = false, -- Register the terminal so it can be toggled
+			direction = terminal_direction,
+			close_on_exit = false,
+			newline_chr = "\n", -- The character to use for newlines, set manually to avoid issues with adding extra newlines
+			display_name = "IPython terminal",
+			on_exit = function()
+				ipy_term = nil
+			end,
+		})
+	end
+	if not ipy_term:is_open() then
+		ipy_term:toggle()
+	end
+	return ipy_term
+end
+
+local run_python_file_in_ipython_terminal = function()
+	-- Initialize
+	local file = vim.api.nvim_buf_get_name(0)
+	-- Save the file before running it
+	vim.cmd("wall")
+	if file == "" then
+		vim.notify("No file to run", vim.log.levels.ERROR)
+		return
+	end
+	if vim.bo.filetype ~= "python" then
+		vim.notify("This only works for Python files", vim.log.levels.WARN)
+		return
+	end
+	-- Ignore IPython warnings about running inside a virtual environment
+	local python_env = current_python_env or "python"
+	local cmd = string.format('"%s" -W "ignore:.*interactiveshell.py:UserWarning" -m IPython', python_env)
+	ipy_term = create_or_get_ipython_terminal(cmd)
+	file = string.gsub(file, "[\r\n]+$", "")
+	-- Change to the file's directory before running
+	local file_dir = vim.fn.fnamemodify(file, ":h")
+	ipy_term:send(string.format('cd "%s"', file_dir), true)
+	-- clear line and send to terminal by sending Ctrl+U
+	local file_basename = vim.fn.fnamemodify(file, ":t")
+	ipy_term:send("\x15" .. string.format("%%run %s", file_basename), true)
+	-- ipy_term:send("\x15" .. string.format("%%run %s", file), false)
+end
+
+local function find_python_envs_on_linux()
+	local envs = {}
+	-- Linux/MacOS
+	local find_cmd =
+		[[find -L /usr/bin /usr/local/bin ~/.pyenv/versions ~/.conda/envs ~/anaconda3/envs -type f -name python 2>/dev/null; which python]]
+	local linux_handle = io.popen(find_cmd)
+	if linux_handle then
+		for line in linux_handle:lines() do
+			table.insert(envs, line)
+		end
+		linux_handle:close()
+	end
+	return envs
+end
+
+local function find_python_envs_on_windows()
+	local envs = {}
+	-- Only check common install locations, avoid recursive search for speed
+	-- Add all miniconda3 folders
+	local candidates = {
+		os.getenv("USERPROFILE") .. "\\AppData\\Local\\miniconda3",
+	}
+	-- Add all miniconda3 envs folders
+	local miniconda_envs = os.getenv("USERPROFILE") .. "\\AppData\\Local\\miniconda3\\envs"
+	local envs_handle = io.popen('dir /b /ad "' .. miniconda_envs .. '" 2>nul')
+	if envs_handle then
+		for folder in envs_handle:lines() do
+			table.insert(candidates, miniconda_envs .. "\\" .. folder)
+		end
+		envs_handle:close()
+	end
+	-- Add all C:\Software\WPy64* folders
+	local wpy_handle = io.popen('dir /b /ad "C:\\Software\\WPy64*" 2>nul')
+	if wpy_handle then
+		for folder in wpy_handle:lines() do
+			local wpy_python_handle = io.popen('dir /b /ad "C:\\Software\\' .. folder .. '\\python*" 2>nul')
+			if wpy_python_handle then
+				for subfolder in wpy_python_handle:lines() do
+					table.insert(candidates, "C:\\Software\\" .. folder .. "\\" .. subfolder)
+				end
+				wpy_python_handle:close()
+			end
+			local envs_dir = "C:\\Software\\" .. folder .. "\\envs"
+			-- Add all subfolders of the environments folder
+			envs_handle = io.popen('dir /b /ad "' .. envs_dir .. '" 2>nul')
+			if envs_handle then
+				for subenv in envs_handle:lines() do
+					table.insert(candidates, envs_dir .. "\\" .. subenv .. "\\Scripts")
+				end
+				envs_handle:close()
+			end
+		end
+		wpy_handle:close()
+	end
+	-- Process candidate folders
+	for _, dir in ipairs(candidates) do
+		local handle = io.popen('dir /b "' .. dir .. '\\python.exe" 2>nul')
+		if handle then
+			for line in handle:lines() do
+				table.insert(envs, dir .. "\\" .. line)
+			end
+			handle:close()
+		end
+	end
+	-- Also add python from PATH
+	local handle = io.popen("where python 2>nul")
+	if handle then
+		for line in handle:lines() do
+			table.insert(envs, line)
+		end
+		handle:close()
+	end
+	return envs
+end
+
+local function find_python_envs()
+	---@diagnostic disable-next-line: undefined-field
+	local is_windows = vim.loop.os_uname().version:match("Windows")
+	if is_windows then
+		return find_python_envs_on_windows()
+	else
+		return find_python_envs_on_linux()
+	end
+end
+
+-- TODO test this one
+local function pick_python_env_async()
+	local pickers = require("telescope.pickers")
+	local finders = require("telescope.finders")
+	local actions = require("telescope.actions")
+	local action_state = require("telescope.actions.state")
+	local conf = require("telescope.config").values
+
+	local search_cmd =
+		[[which -a python python3 2>/dev/null; find -L ~/.pyenv/versions ~/.conda/envs ~/anaconda3/envs -type f -name python 2>/dev/null]]
+	vim.system({ "bash", "-c", search_cmd }, { text = true }, function(obj)
+		if obj.code == 0 and obj.stdout then
+			local envs = {}
+			for line in obj.stdout:gmatch("[^\r\n]+") do
+				table.insert(envs, line)
+			end
+			pickers
+				.new({}, {
+					prompt_title = "Select Python Environment",
+					finder = finders.new_table({ results = envs }),
+					sorter = conf.generic_sorter({}),
+					attach_mappings = function(prompt_bufnr, _)
+						actions.select_default:replace(function()
+							actions.close(prompt_bufnr)
+							local selection = action_state.get_selected_entry()
+							current_python_env = selection[1]
+							vim.notify("Selected Python: " .. current_python_env)
+						end)
+						return true
+					end,
+				})
+				:find()
+		else
+			vim.notify("Failed to find Python environments", vim.log.levels.ERROR)
+		end
+	end)
+end
+
+local function pick_python_env()
+	local pickers = require("telescope.pickers")
+	local finders = require("telescope.finders")
+	local actions = require("telescope.actions")
+	local action_state = require("telescope.actions.state")
+	local conf = require("telescope.config").values
+	-- Find python executables in common locations
+	if not python_envs then
+		python_envs = find_python_envs()
+	end
+	pickers
+		.new({}, {
+			prompt_title = "Select Python Environment",
+			finder = finders.new_table({ results = python_envs }),
+			sorter = conf.generic_sorter({}),
+			attach_mappings = function(prompt_bufnr, _)
+				actions.select_default:replace(function()
+					actions.close(prompt_bufnr)
+					local selection = action_state.get_selected_entry()
+					current_python_env = selection[1]
+					vim.notify("Selected Python: " .. current_python_env)
+				end)
+				return true
+			end,
+		})
+		:find()
+end
+
+local function in_debug_mode()
+	if not ipy_term or not ipy_term.bufnr then
+		vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+		return false
+	end
+	local lines = vim.api.nvim_buf_get_lines(ipy_term.bufnr, 0, -1, false)
+	-- for i = math.max(1, #lines - 10), #lines do
+	for i = #lines, 1, -1 do
+		local line = lines[i]
+		if line and line:match("%(Pdb%)") then
+			return true
+		elseif line and line:match("%(IPdb%)") then
+			return true
+		elseif line and line:match("%(ipdb%)") then
+			return true
+		elseif line and line:match("^ipdb>") then
+			return true
+		elseif line and line:match("^In %[%d+%]:") then
+			return false
+		end
+	end
+	vim.notify("Not in debug mode", vim.log.levels.WARN)
+	return false
+end
+
+-------------------------------- Set up commands and mappings --------------------------------
+print("repl.lua loaded")
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "python",
+	callback = function(args)
+		print("FileType autocmd triggered for python")
+		local buf = args.buf
+		local opts = { buffer = buf, noremap = true, silent = true }
+		-- Create a command to pick Python environment
+		vim.api.nvim_buf_create_user_command(buf, "PickPythonEnv", function()
+			pick_python_env()
+		end, { desc = "Pick Python environment" })
+		-- Create a command to clear Python environments
+		vim.api.nvim_buf_create_user_command(buf, "ClearPythonEnvs", function()
+			python_envs = nil
+			vim.notify("Cleared Python environments")
+		end, { desc = "Clear Python environments" })
+		-- Run the current Python file in IPython terminal
+		vim.api.nvim_buf_create_user_command(buf, "RunIpyFile", function()
+			run_python_file_in_ipython_terminal()
+		end, { desc = "Run current Python file in IPython terminal" })
+		-- Create a command to toggle the IPython terminal
+		vim.api.nvim_buf_create_user_command(buf, "ToggleIPythonTerm", function()
+			create_or_get_ipython_terminal(nil)
+		end, { desc = "Toggle IPython terminal" })
+		-- Command to switch terminal direction
+		vim.api.nvim_buf_create_user_command(buf, "SwitchIPythonTerminalDirection", function()
+			if terminal_direction == "float" then
+				terminal_direction = "vertical"
+			else
+				terminal_direction = "float"
+			end
+			vim.notify("Terminal direction set to: " .. terminal_direction)
+		end, { desc = "Switch terminal split direction" })
+		-- Key mappings for the IPython terminal
+		vim.keymap.set("t", "<C-w>h", "<C-\\><C-n><C-w>h", { noremap = true })
+		vim.keymap.set("t", "<C-w>j", "<C-\\><C-n><C-w>j", { noremap = true })
+		vim.keymap.set("t", "<C-w>k", "<C-\\><C-n><C-w>k", { noremap = true })
+		vim.keymap.set("t", "<C-w>l", "<C-\\><C-n><C-w>l", { noremap = true })
+		vim.keymap.set("n", "<F9>", function()
+			blink.current_line(50)
+			vim.cmd("ToggleTermSendCurrentLine " .. vim.v.count1)
+			vim.schedule(function()
+				vim.cmd("stopinsert")
+			end)
+			helpers.move_to_next_non_empty_line()
+		end, opts)
+		vim.keymap.set("v", "<F9>", function()
+			local start_pos = vim.fn.getpos("v")
+			local end_pos = vim.fn.getpos(".")
+			if start_pos[2] > end_pos[2] or (start_pos[2] == end_pos[2] and start_pos[3] > end_pos[3]) then
+				start_pos, end_pos = end_pos, start_pos
+			end
+			local start_line = start_pos[2] - 1
+			local start_col = start_pos[3] - 1
+			local end_line = end_pos[2] - 1
+			local end_col = end_pos[3]
+			blink.selection(50, start_line, end_line, start_col, end_col)
+			vim.cmd("ToggleTermSendVisualSelection " .. vim.v.count1)
+		end, opts)
+		vim.keymap.set({ "n", "i", "v" }, "<F5>", function()
+			if ipy_term == nil then
+				vim.cmd("RunIpyFile")
+			elseif not in_debug_mode() then
+				vim.cmd("RunIpyFile")
+			else
+				ipy_term:send("continue", false)
+			end
+		end, vim.tbl_extend("force", opts, { desc = "Run/Continue" }))
+		vim.keymap.set("n", "<F10>", function()
+			if ipy_term == nil then
+				vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+				return
+			elseif not in_debug_mode() then
+				vim.notify("Not in debug mode", vim.log.levels.WARN)
+			else
+				ipy_term:send("next", false)
+			end
+		end, vim.tbl_extend("force", opts, { desc = "Step over" }))
+		vim.keymap.set("n", "<F11>", function()
+			if ipy_term == nil then
+				vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+				return
+			elseif not in_debug_mode() then
+				vim.notify("Not in debug mode", vim.log.levels.WARN)
+			else
+				ipy_term:send("step", false)
+			end
+		end, vim.tbl_extend("force", opts, { desc = "Step into" }))
+		vim.keymap.set("n", "<S-F11>", function()
+			if ipy_term == nil then
+				vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+				return
+			elseif not in_debug_mode() then
+				vim.notify("Not in debug mode", vim.log.levels.WARN)
+			else
+				ipy_term:send("r", false)
+			end
+		end, vim.tbl_extend("force", opts, { desc = "Step out/return" }))
+	end,
+})
