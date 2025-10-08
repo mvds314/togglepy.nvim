@@ -16,4 +16,6 @@ vim.schedule(function()
 	end
 end)
 
+-- TODO: write documentation for the plugin
+
 return M

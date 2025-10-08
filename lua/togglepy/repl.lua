@@ -5,11 +5,15 @@ local current_python_env = nil
 -- Stores list with all Python environments
 local python_envs = nil
 -- Helpers for blinking text to be sent to the terminal
+-- TODO: add those explicitly to the plugin
 local blink = require("util.blink")
 local helpers = require("util.helpers")
 -- Local variable to store preferred terminal direction
 local terminal_direction = "vertical"
 
+-- TODO: decide what parts of this file should be options
+
+-- TODO: process these TODOs or put them on the backlog in the readme
 -- TODO:
 -- Fix bug, when term exits ipy_term is not cleared
 -- Create a mapping for debugging Python files with ipython
@@ -18,6 +22,7 @@ local terminal_direction = "vertical"
 -- Put finding environments in a subprocess to avoid blocking Neovim
 -- Make logic for multiple ipython terminals
 
+-- TODO: decite which functions to expose in the module
 local create_or_get_ipython_terminal = function(cmd)
 	local Terminal = require("toggleterm.terminal").Terminal
 	if not cmd then
@@ -248,7 +253,7 @@ local function in_debug_mode()
 end
 
 -------------------------------- Set up commands and mappings --------------------------------
-print("repl.lua loaded")
+-- TODO: should this be part of plugin?
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "python",
 	callback = function(args)
