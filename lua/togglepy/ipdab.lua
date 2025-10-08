@@ -25,4 +25,6 @@ function M.setup(opts)
 	})
 end
 
+-- TODO: configure the DAPui look and feel for this option
+
 return M
