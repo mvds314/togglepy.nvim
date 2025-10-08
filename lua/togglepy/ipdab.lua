@@ -10,7 +10,7 @@ function M.setup(opts)
 
 	dap.adapters.ipdb = {
 		type = "server",
-		host = opts.host or "127.0.0.1",
+		host = opts.host or "localhost",
 		port = opts.port or 9000,
 	}
 
