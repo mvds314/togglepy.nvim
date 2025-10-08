@@ -10,8 +10,6 @@ local helpers = require("togglepy.helpers")
 -- Local variable to store preferred terminal direction
 local terminal_direction = "vertical"
 
--- TODO: decide what parts of this file should be options
-
 -- TODO: process these TODOs or put them on the backlog in the readme
 -- TODO:
 -- Fix bug, when term exits ipy_term is not cleared
@@ -252,6 +250,7 @@ local function in_debug_mode()
 end
 
 -------------------------------- Set up commands and mappings --------------------------------
+-- Make the mappings into params
 -- TODO: should this be part of plugin?
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "python",
