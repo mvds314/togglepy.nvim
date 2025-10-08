@@ -5,9 +5,8 @@ local current_python_env = nil
 -- Stores list with all Python environments
 local python_envs = nil
 -- Helpers for blinking text to be sent to the terminal
--- TODO: add those explicitly to the plugin
-local blink = require("util.blink")
-local helpers = require("util.helpers")
+local blink = require("togglepy.blink")
+local helpers = require("togglepy.helpers")
 -- Local variable to store preferred terminal direction
 local terminal_direction = "vertical"
 
