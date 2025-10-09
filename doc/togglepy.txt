@@ -3,10 +3,11 @@ togglepy.nvim - A plugin for toggling Python debugging and REPLs
 ===============================================================================
 
 1. Introduction                                     *togglepy-intro*
-   togglepy.nvim is a Neovim plugin that provide REPL based workflows often
-   also used in scientitic programming development environments, e.g., MATLAB, R, etc.
+   togglepy.nvim is a Neovim plugin that provide a REPL based workflow, similar
+   to you encounter in the scientitic programming development environments of
+   MATLAB, R, and Python's Spyder IDE.
 
-   It allows you to:
+   This plugin allows you to:
    * Open an ipython REPL within Neovim (based on toggleterm.nvim) and easily switch to it.
    * Send lines or visual selections to the REPL.
    * Debug Python code with ipdb/pdb in the REPL and keep track of the debugging session in Neovim
@@ -14,24 +15,25 @@ togglepy.nvim - A plugin for toggling Python debugging and REPLs
    * Switch between virtual environments (using telescope.nvim).
 
 2. Why?
-   Python is ideal if you want to to scientific programming with well structured code.
-   It is intepreted interpreted like MATLAB and R. But, at the same time, it's more than
-   just another scripting language, because its advanced programming features features 
-   (functions, classes, modules, unittesting,..) are not just add-ons, but are core parts
+   Python is ideal if you want to do scientific programming with well structured code.
+   It is interpreted like MATLAB and R. But, at the same time, it's more than
+   just another scripting language. Its advanced programming features, such
+   as classes, modules and unit testing, are not just add-ons, but are core parts
    of the language.
 
-   Problems start when you start to apply programming workflows of compiled languages like C/C++/Java,
-   to scientific programming with Python. Say you create a function or method that plots some data,
-   and you don't like the way it looks. What you want to do is debug with an interactive REPL
-   inside the function where you make the plot, change some code, send it to the REPL, until it looks
-   the way you want.
+   Neovim has great support for the development workflow of compiled languages
+   like C, C++, and Java. Problems start, however, when you start to apply those workflows
+   to scientific programming with Python. For example, say you create a function or method
+   that plots some data, and you don't like the way it looks. What you want to do is debug
+   with an interactive REPL inside the function where you make the plot, change some code,
+   send it to the REPL, until it looks the way you want.
 
-   The way out is to make the REPL an integral part of your development workflow. This is what togglepy.nvim
-   is all about.
+   The way out is to make the REPL an integral part of your development workflow.
+   This is what togglepy.nvim is all about.
 
 3. Setup                                            *togglepy-setup*
     Prerequisites:
-      * Python with ipython, and ipdab installed.
+      * Python with `ipython`, and `ipdab` installed.
       * The Neovim with the following plugins:
         - nvim-telescope/telescope.nvim
         - nvim-lua/plenary.nvim
@@ -55,8 +57,9 @@ togglepy.nvim - A plugin for toggling Python debugging and REPLs
               require('togglepy').setup({ <key>=<value> })
           end,
       })
+    TODO: add the default values here and describe them
 
-    For best integration, set up the <C-\> keymapping to toggle the terminal in toggleterm.
+    For best integration, set up the <C-\> keymapping to toggle the terminal with toggleterm.
     The following is an example configuration a decent toggleterm.nvim configuration:
     require("lazy").setup({
       "akinsho/toggleterm.nvim",
@@ -88,25 +91,26 @@ togglepy.nvim - A plugin for toggling Python debugging and REPLs
     })
 
 4. Provided commands                                *togglepy-commands*
-   - `:TogglePyDebug`: Start or stop Python debugging.
-   - `:TogglePyRepl`: Open or close the Python REPL.
+   - `:ToggleIPythonTerm`: Creates or toggles the ipython REPL terminal.
+   TODO: update the provided commands
 
-4. How it works?
+4. How it works
    
    When you open a Python file, and use the command `:ToggleIPythonTerm`, a special toggleterm terminal is created
-   that starts ipython by default.
+   that starts `ipython` by default.
    This one will be remembered by togglepy.nvim, until you close its buffer, and used for all REPL interactions.
    Most often, it might be the only toggleterm terminal you use, in which case you can hide/unhide to it with `<C-\>`.
    Single lines or selections can be send to the terminal with <F9>.
-   Your file can be executed with <F5>, which which also create a terminal if it does not exist yet.
+   Your file can be executed with <F5>, which which will create terminal if it does not exist yet,
+   and runs your script with the ipython magic `%run your_script.py`.
 
    TODO: check the switcher
-   By default the terminal with start in the Python environment available at the prompt where Neovim is started.
-   You can also switch to another virtual environment with <leader>tv, which uses telescope.nvim.
-   For this to work, the terminal needs to restart.
+   By default the terminal will start in the Python environment as available at the prompt where Neovim is started.
+   You can also switch to another virtual environment with `<leader>tv`, which uses telescope.nvim.
+   For this to work, the terminal needs to restart as well.
 
-   It is recommended to use the ipython REPL with the `autoreload` extension enabled. This will basically ensure that,
-   in most cases, modules are reloaded when you make changes to them before execution. You can automate this by
+   It is recommended to use the ipython REPL with the `autoreload` extension enabled. This will basically ensure that
+   modules are reloaded when you make changes to them before execution. You can automate this by
    creating a file `~/.ipython/profile_default/startup/mystartup.py` with the following content:
 
    ```python
@@ -115,19 +119,20 @@ togglepy.nvim - A plugin for toggling Python debugging and REPLs
    get_ipython().run_line_magic("autoreload", "2")
    ```
 
-   There are some cases where autoreload does not work, e.g., so unfortunately, 
-   sometimes, you still have to restart the REPL. Togglepy.nvim does intend to solve this, as this
-   is just the way the ipython terminal seems to work.
+   There are some cases where autoreload does not work. So, unfortunately, 
+   sometimes, you still have to restart the REPL. Togglepy.nvim does intend to solve this,
+   as this is just the way the ipython terminal seems to work.
 
    To get seemless debugging integration, we use the ipdab Python package, which is a small wrapper around
    the standard ipdb/pdb debugger. Basically, use `import ipdab; ipdab.set_trace()` instead of 
    `import pdb; pdb.set_trace()`. What now happens in the background is that a TCP server is started
    that provides the Debug Adapter Protocol (DAP) interface. This is then used by nvim-dap.nvim
    to connect to the debugging session. Unfortunately, pdb/ipdb are blocking once you hit a breakpoint, 
-   i.e., control is given to the user in the REPL, the debugging session cannot be fully controlled by nvim-dap.nvim.
+   i.e., control is given to the user or process that controls the REPL.
+   Therefore, the debugging session cannot be fully controlled by nvim-dap.nvim.
    The way out with Neovim is to create keymaps <F5>, <F10>, <F11> to that send `continue`, `next`, and `step` commands
-   to the REPL. This only works because Neovim controls the teminal, and can send commands to it.
-   When running you Python program in a separate terminal, outside of Neovim, you can still
+   to the REPL. This works because Neovim controls the teminal to which the debugging control when it is blocking.
+   When running your Python program in a separate terminal, outside of Neovim, you can still
    connect the debugger to it, but because Neovim does not control the terminal, you cannot
    send commands to it and control the debugging session from within Neovim.
 
