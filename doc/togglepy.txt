@@ -127,44 +127,42 @@ Single lines or selections can be send to the terminal with <F9>. Your file
 can be executed with <F5>, which which will create terminal if it does not
 exist yet, and runs your script with the ipython magic `%run your_script.py`.
 
-TODO: check the switcher By default the terminal will start in the Python
-environment as available at the prompt where Neovim is started. You can
-also switch to another virtual environment with `<leader>tv`, which uses
-telescope.nvim. For this to work, the terminal needs to restart as well.
+TODO: check the switcher
+
+By default the terminal will start in the Python environment as available at
+the prompt where Neovim is started. You can also switch to another virtual
+environment with `<leader>tv`, which uses telescope.nvim. For this to work,
+the terminal needs to restart as well.
 
 It is recommended to use the ipython REPL with the `autoreload` extension
 enabled. This will basically ensure that modules are reloaded when you make
 changes to them before execution. You can automate this by creating a file
 `~/.ipython/profile_default/startup/mystartup.py` with the following
 content:
-
-TODO: format this properly
-```python
-# ~/.ipython/profile_default/startup/mystartup.py
-get_ipython().run_line_magic("load_ext", "autoreload")
-get_ipython().run_line_magic("autoreload", "2")
-```
-
+>
+ # ~/.ipython/profile_default/startup/mystartup.py
+ get_ipython().run_line_magic("load_ext", "autoreload")
+ get_ipython().run_line_magic("autoreload", "2")
+<
 There are some cases where autoreload does not work. So, unfortunately,
-sometimes, you still have to restart the REPL. Togglepy.nvim does intend to
-solve this, as this is just the way the ipython terminal seems to work.
+sometimes, you still have to restart the REPL. As togglepy.nvim provides 
+the ipython REPL as is, so this is just how it works for now.
 
-To get seemless debugging integration, we use the ipdab Python package,
-which is a small wrapper around the standard ipdb/pdb debugger. Basically,
-use `import ipdab; ipdab.set_trace()` instead of `import pdb;
-pdb.set_trace()`. What now happens in the background is that a TCP server
-is started that provides the Debug Adapter Protocol (DAP) interface. This
-is then used by nvim-dap.nvim to connect to the debugging session.
-Unfortunately, pdb/ipdb are blocking once you hit a breakpoint, i.e.,
-control is given to the user or process that controls the REPL. Therefore,
-the debugging session cannot be fully controlled by nvim-dap.nvim. The way
-out with Neovim is to create keymaps <F5>, <F10>, <F11> to that send
-`continue`, `next`, and `step` commands to the REPL. This works because
-Neovim controls the teminal to which the debugging control when it is
-blocking. When running your Python program in a separate terminal, outside
-of Neovim, you can still connect the debugger to it, but because Neovim
-does not control the terminal, you cannot send commands to it and control
-the debugging session from within Neovim.
+To get seemless debugging integration, we use the ipdab Python package, which
+is a small wrapper around the standard ipdb/pdb debugger. Basically, use
+`import ipdab; ipdab.set_trace()` instead of `import pdb; pdb.set_trace()`.
+What now happens in the background is that a TCP server is started that
+provides the Debug Adapter Protocol (DAP) interface. This is then used by
+nvim-dap.nvim to connect to the debugging session. Unfortunately, pdb/ipdb are
+blocking once you hit a breakpoint, i.e., control is given to the user or
+process that controls the REPL. Therefore, the debugging session cannot be
+fully controlled by nvim-dap.nvim. The way out with Neovim is to create
+keymaps <F5>, <F10>, <F11> to that send `continue`, `next`, and `step`
+commands to the REPL. This works because Neovim controls the teminal to which
+the debugging control when it is blocking. When running your Python program in
+a separate terminal, outside of Neovim, you can still connect the debugger to
+it, but because Neovim does not control the terminal, you cannot send commands
+to it and control the debugging session from within Neovim.
 
 
 
