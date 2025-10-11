@@ -148,6 +148,7 @@ local function find_python_envs_on_windows()
 	return envs
 end
 
+-- TODO: make the search paths configurable
 local function find_python_envs()
 	---@diagnostic disable-next-line: undefined-field
 	local is_windows = vim.loop.os_uname().version:match("Windows")
