@@ -2,8 +2,6 @@
 togglepy.nvim - A plugin for toggling Python debugging and REPLs
 ===============================================================================
 
-TODO read everythign again
-
 1. Introduction *togglepy-intro* 
 
 togglepy.nvim is a Neovim plugin that provides a REPL based workflow for
