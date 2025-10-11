@@ -278,10 +278,6 @@ vim.api.nvim_create_user_command("SwitchIPythonTerminalDirection", function()
 end, { desc = "Switch terminal split direction" })
 -- Make these keymaps optional or configurable
 -- Key mappings for the IPython terminal
-vim.keymap.set("t", "<C-w>h", "<C-\\><C-n><C-w>h", { noremap = true })
-vim.keymap.set("t", "<C-w>j", "<C-\\><C-n><C-w>j", { noremap = true })
-vim.keymap.set("t", "<C-w>k", "<C-\\><C-n><C-w>k", { noremap = true })
-vim.keymap.set("t", "<C-w>l", "<C-\\><C-n><C-w>l", { noremap = true })
 vim.keymap.set("n", "<F9>", function()
 	if vim.bo.filetype ~= "python" then
 		vim.notify("This only works for Python files", vim.log.levels.WARN)
