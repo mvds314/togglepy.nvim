@@ -4,7 +4,9 @@ local _setup_called = false
 
 function M.setup(opts)
 	_setup_called = true
-	require("togglepy.ipdab").setup(opts)
+	local ipdab_opts = opts and opts.ipdab or {}
+	-- local repl_opts = opts and opts.repl or {}
+	require("togglepy.ipdab").setup(ipdab_opts)
 	require("togglepy.repl")
 end
 
