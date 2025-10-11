@@ -10,14 +10,6 @@ local helpers = require("togglepy.helpers")
 -- Local variable to store preferred terminal direction
 local terminal_direction = "vertical"
 
--- TODO: process these TODOs or put them on the backlog in the readme
--- TODO:
--- Fix bug, when term exits ipy_term is not cleared
--- Create a mapping for debugging Python files with ipython
--- Consider to add switching environment logic to Telescope as a plugin
--- Put finding environments in a subprocess to avoid blocking Neovim
--- Make logic for multiple ipython terminals
-
 -- TODO: decite which functions to expose in the module
 local create_or_get_ipython_terminal = function(cmd)
 	local Terminal = require("toggleterm.terminal").Terminal
