@@ -14,7 +14,6 @@ local terminal_direction = "vertical"
 -- TODO:
 -- Fix bug, when term exits ipy_term is not cleared
 -- Create a mapping for debugging Python files with ipython
--- Create mappings for debug keys: next step, continue, etc.
 -- Consider to add switching environment logic to Telescope as a plugin
 -- Put finding environments in a subprocess to avoid blocking Neovim
 -- Make logic for multiple ipython terminals
@@ -47,6 +46,11 @@ local create_or_get_ipython_terminal = function(cmd)
 end
 
 local run_python_file_in_ipython_terminal = function()
+	-- Check if the current buffer is a Python file
+	if vim.bo.filetype ~= "python" then
+		vim.notify("This only works for Python files", vim.log.levels.WARN)
+		return
+	end
 	-- Initialize
 	local file = vim.api.nvim_buf_get_name(0)
 	-- Save the file before running it
@@ -251,104 +255,106 @@ local function in_debug_mode()
 end
 
 -------------------------------- Set up commands and mappings --------------------------------
--- Make the mappings into params
--- TODO: should this be part of plugin?
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = "python",
-	callback = function(args)
-		print("FileType autocmd triggered for python")
-		local buf = args.buf
-		local opts = { buffer = buf, noremap = true, silent = true }
-		-- Create a command to pick Python environment
-		vim.api.nvim_buf_create_user_command(buf, "PickPythonEnv", function()
-			pick_python_env()
-		end, { desc = "Pick Python environment" })
-		-- Create a command to clear Python environments
-		vim.api.nvim_buf_create_user_command(buf, "ClearPythonEnvs", function()
-			python_envs = nil
-			vim.notify("Cleared Python environments")
-		end, { desc = "Clear Python environments" })
-		-- Run the current Python file in IPython terminal
-		vim.api.nvim_buf_create_user_command(buf, "RunIpyFile", function()
-			run_python_file_in_ipython_terminal()
-		end, { desc = "Run current Python file in IPython terminal" })
-		-- Create a command to toggle the IPython terminal
-		vim.api.nvim_buf_create_user_command(buf, "ToggleIPythonTerm", function()
-			create_or_get_ipython_terminal(nil)
-		end, { desc = "Toggle IPython terminal" })
-		-- Command to switch terminal direction
-		vim.api.nvim_buf_create_user_command(buf, "SwitchIPythonTerminalDirection", function()
-			if terminal_direction == "float" then
-				terminal_direction = "vertical"
-			else
-				terminal_direction = "float"
-			end
-			vim.notify("Terminal direction set to: " .. terminal_direction)
-		end, { desc = "Switch terminal split direction" })
-		-- Key mappings for the IPython terminal
-		vim.keymap.set("t", "<C-w>h", "<C-\\><C-n><C-w>h", { noremap = true })
-		vim.keymap.set("t", "<C-w>j", "<C-\\><C-n><C-w>j", { noremap = true })
-		vim.keymap.set("t", "<C-w>k", "<C-\\><C-n><C-w>k", { noremap = true })
-		vim.keymap.set("t", "<C-w>l", "<C-\\><C-n><C-w>l", { noremap = true })
-		vim.keymap.set("n", "<F9>", function()
-			blink.current_line(50)
-			vim.cmd("ToggleTermSendCurrentLine " .. vim.v.count1)
-			vim.schedule(function()
-				vim.cmd("stopinsert")
-			end)
-			helpers.move_to_next_non_empty_line()
-		end, opts)
-		vim.keymap.set("v", "<F9>", function()
-			local start_pos = vim.fn.getpos("v")
-			local end_pos = vim.fn.getpos(".")
-			if start_pos[2] > end_pos[2] or (start_pos[2] == end_pos[2] and start_pos[3] > end_pos[3]) then
-				start_pos, end_pos = end_pos, start_pos
-			end
-			local start_line = start_pos[2] - 1
-			local start_col = start_pos[3] - 1
-			local end_line = end_pos[2] - 1
-			local end_col = end_pos[3]
-			blink.selection(50, start_line, end_line, start_col, end_col)
-			vim.cmd("ToggleTermSendVisualSelection " .. vim.v.count1)
-		end, opts)
-		vim.keymap.set({ "n", "i", "v" }, "<F5>", function()
-			if ipy_term == nil then
-				vim.cmd("RunIpyFile")
-			elseif not in_debug_mode() then
-				vim.cmd("RunIpyFile")
-			else
-				ipy_term:send("continue", false)
-			end
-		end, vim.tbl_extend("force", opts, { desc = "Run/Continue" }))
-		vim.keymap.set("n", "<F10>", function()
-			if ipy_term == nil then
-				vim.notify("IPython terminal is not open", vim.log.levels.WARN)
-				return
-			elseif not in_debug_mode() then
-				vim.notify("Not in debug mode", vim.log.levels.WARN)
-			else
-				ipy_term:send("next", false)
-			end
-		end, vim.tbl_extend("force", opts, { desc = "Step over" }))
-		vim.keymap.set("n", "<F11>", function()
-			if ipy_term == nil then
-				vim.notify("IPython terminal is not open", vim.log.levels.WARN)
-				return
-			elseif not in_debug_mode() then
-				vim.notify("Not in debug mode", vim.log.levels.WARN)
-			else
-				ipy_term:send("step", false)
-			end
-		end, vim.tbl_extend("force", opts, { desc = "Step into" }))
-		vim.keymap.set("n", "<S-F11>", function()
-			if ipy_term == nil then
-				vim.notify("IPython terminal is not open", vim.log.levels.WARN)
-				return
-			elseif not in_debug_mode() then
-				vim.notify("Not in debug mode", vim.log.levels.WARN)
-			else
-				ipy_term:send("r", false)
-			end
-		end, vim.tbl_extend("force", opts, { desc = "Step out/return" }))
-	end,
-})
+
+-- TODO: create user commands instead of keymaps
+
+-- Create a command to pick Python environment
+vim.api.nvim_create_user_command("PickPythonEnv", function()
+	pick_python_env()
+end, { desc = "Pick Python environment" })
+-- Create a command to clear Python environments
+vim.api.nvim_create_user_command("ClearPythonEnvs", function()
+	python_envs = nil
+	vim.notify("Cleared Python environments")
+end, { desc = "Clear Python environments" })
+-- Run the current Python file in IPython terminal
+vim.api.nvim_create_user_command("RunIpyFile", function()
+	run_python_file_in_ipython_terminal()
+end, { desc = "Run current Python file in IPython terminal" })
+-- Create a command to toggle the IPython terminal
+vim.api.nvim_create_user_command("ToggleIPythonTerm", function()
+	create_or_get_ipython_terminal(nil)
+end, { desc = "Toggle IPython terminal" })
+-- Command to switch terminal direction
+vim.api.nvim_create_user_command("SwitchIPythonTerminalDirection", function()
+	if terminal_direction == "float" then
+		terminal_direction = "vertical"
+	else
+		terminal_direction = "float"
+	end
+	vim.notify("Terminal direction set to: " .. terminal_direction)
+end, { desc = "Switch terminal split direction" })
+-- Make these keymaps optional or configurable
+-- Key mappings for the IPython terminal
+vim.keymap.set("t", "<C-w>h", "<C-\\><C-n><C-w>h", { noremap = true })
+vim.keymap.set("t", "<C-w>j", "<C-\\><C-n><C-w>j", { noremap = true })
+vim.keymap.set("t", "<C-w>k", "<C-\\><C-n><C-w>k", { noremap = true })
+vim.keymap.set("t", "<C-w>l", "<C-\\><C-n><C-w>l", { noremap = true })
+vim.keymap.set("n", "<F9>", function()
+	if vim.bo.filetype ~= "python" then
+		vim.notify("This only works for Python files", vim.log.levels.WARN)
+		return
+	end
+	blink.current_line(50)
+	vim.cmd("ToggleTermSendCurrentLine " .. vim.v.count1)
+	vim.schedule(function()
+		vim.cmd("stopinsert")
+	end)
+	helpers.move_to_next_non_empty_line()
+end, { noremap = true, silent = true, desc = "Send current line to IPython terminal" })
+vim.keymap.set("v", "<F9>", function()
+	if vim.bo.filetype ~= "python" then
+		vim.notify("This only works for Python files", vim.log.levels.WARN)
+		return
+	end
+	local start_pos = vim.fn.getpos("v")
+	local end_pos = vim.fn.getpos(".")
+	if start_pos[2] > end_pos[2] or (start_pos[2] == end_pos[2] and start_pos[3] > end_pos[3]) then
+		start_pos, end_pos = end_pos, start_pos
+	end
+	local start_line = start_pos[2] - 1
+	local start_col = start_pos[3] - 1
+	local end_line = end_pos[2] - 1
+	local end_col = end_pos[3]
+	blink.selection(50, start_line, end_line, start_col, end_col)
+	vim.cmd("ToggleTermSendVisualSelection " .. vim.v.count1)
+end, { noremap = true, silent = true, desc = "Send visual selection to IPython terminal" })
+vim.keymap.set({ "n", "i", "v" }, "<F5>", function()
+	if ipy_term == nil then
+		vim.cmd("RunIpyFile")
+	elseif not in_debug_mode() then
+		vim.cmd("RunIpyFile")
+	else
+		ipy_term:send("continue", false)
+	end
+end, { noremap = true, silent = true, desc = "Run/Continue" })
+vim.keymap.set("n", "<F10>", function()
+	if ipy_term == nil then
+		vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+		return
+	elseif not in_debug_mode() then
+		vim.notify("Not in debug mode", vim.log.levels.WARN)
+	else
+		ipy_term:send("next", false)
+	end
+end, { noremap = true, silent = true, desc = "Step over" })
+vim.keymap.set("n", "<F11>", function()
+	if ipy_term == nil then
+		vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+		return
+	elseif not in_debug_mode() then
+		vim.notify("Not in debug mode", vim.log.levels.WARN)
+	else
+		ipy_term:send("step", false)
+	end
+end, { noremap = true, silent = true, desc = "Step into" })
+vim.keymap.set("n", "<S-F11>", function()
+	if ipy_term == nil then
+		vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+		return
+	elseif not in_debug_mode() then
+		vim.notify("Not in debug mode", vim.log.levels.WARN)
+	else
+		ipy_term:send("r", false)
+	end
+end, { noremap = true, silent = true, desc = "Step out/return" })
