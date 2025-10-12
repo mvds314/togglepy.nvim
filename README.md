@@ -96,10 +96,10 @@ When you open a Python file and use the `:TogglePyTerminal` command, a special `
 ### Commands
 
 - `:TogglePyTerminal`: Creates or toggles the IPython REPL terminal.
-- `:RunIpyFile`: Saves all buffers, changes the working directory in the REPL to the file's location, and runs the current Python file using `%run your_script.py`.
-- `:PickPythonEnv`: Searches for Python environments on your system and allows you to pick one with `telescope.nvim`.
-- `:ClearPythonEnvs`: Clears the list of found Python virtual environments.
-- `:SwitchIPythonTerminalDirection`: Switches the REPL terminal direction between `float` and `vertical`.
+- `:TogglePyRunFile`: Saves all buffers, changes the working directory in the REPL to the file's location, and runs the current Python file using `%run your_script.py`.
+- `:TogglePyPickEnv`: Searches for Python environments on your system and allows you to pick one with `telescope.nvim`.
+- `:TogglePyClearEnvs`: Clears the list of found Python virtual environments.
+- `:TogglePySwitchTerminalDirection`: Switches the REPL terminal direction between `float` and `vertical`.
 
 ### Key Bindings
 

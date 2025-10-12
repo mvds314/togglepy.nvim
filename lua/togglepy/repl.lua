@@ -251,11 +251,11 @@ end
 -- TODO: create user commands instead of keymaps
 
 -- Create a command to pick Python environments
-vim.api.nvim_create_user_command("PickPythonEnv", function()
+vim.api.nvim_create_user_command("TogglePyPickEnv", function()
 	pick_python_env()
 end, { desc = "Pick Python environment" })
 -- Create a command to clear Python environments
-vim.api.nvim_create_user_command("ClearPythonEnvs", function()
+vim.api.nvim_create_user_command("TogglePyClearEnvs", function()
 	python_envs = nil
 	vim.notify("Cleared Python environments")
 end, { desc = "Clear Python environments" })
@@ -264,7 +264,7 @@ vim.api.nvim_create_user_command("TogglePyTerminal", function()
 	create_or_get_ipython_terminal(nil)
 end, { desc = "Toggle IPython terminal" })
 -- Command to switch terminal direction
-vim.api.nvim_create_user_command("SwitchIPythonTerminalDirection", function()
+vim.api.nvim_create_user_command("TogglePySwitchTerminalDirection", function()
 	if terminal_direction == "float" then
 		terminal_direction = "vertical"
 	else
@@ -282,7 +282,7 @@ vim.api.nvim_create_autocmd("FileType", {
 			run_python_file_in_ipython_terminal()
 		end, { desc = "Run current Python file in IPython terminal" })
 		-- Send lines or visual selection to the IPython terminal
-		vim.api.nvim_create_user_command("IpySendLine", function(opts)
+		vim.api.nvim_create_user_command("TogglePySendLine", function(opts)
 			if vim.bo.filetype ~= "python" then
 				vim.notify("This only works for Python files", vim.log.levels.WARN)
 				return
@@ -300,8 +300,8 @@ vim.api.nvim_create_autocmd("FileType", {
 -- Key mappings for the IPython terminal
 vim.keymap.set("n", "<F9>", function()
 	if ipy_term == nil then
-		-- TODO: implement this one
-		vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+		vim.cmd("TogglePyTerminal")
+		vim.cmd("TogglePySendLine")
 	else
 		vim.cmd("TogglePySendLine")
 	end

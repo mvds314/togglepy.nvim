@@ -107,17 +107,15 @@ toggleterm.nvim configuration:
 <
 4. Provided commands                                *togglepy-commands*
 
-* `:TogglePyTerminal`: Creates or toggles the ipython REPL terminal. TODO:
-  update the provided commands
-* `:RunIpyFile`: Saves all buffers, changes the working directory in the repl
-  to the location of the file, and runs the current Python file in the ipython
-  REPL using the magic `%run your_script.py`.
-* `:PickPythonEnv`: Search for Python environments on your system and uses
-  telescope.nvim to pick a Python virtual environment.
-* `:ClearPythonEnvs`: Clears the list of found Python virtual environments.
 * `TogglePyTerminal`: Toggles the ipython REPL terminal, i.e., creates it if
   it does not exist yet, or hides/unhides it if it does.
-* `:SwitchIPythonTerminalDirection`: Switches the direction of the
+* `:TogglePyRunFile`: Saves all buffers, changes the working directory in the repl
+  to the location of the file, and runs the current Python file in the ipython
+  REPL using the magic `%run your_script.py`.
+* `:TogglePyPickEnv`: Search for Python environments on your system and uses
+  telescope.nvim to pick a Python virtual environment.
+* `:TogglePyClearEnvs`: Clears the list of found Python virtual environments.
+* `:TogglePySwitchTerminalDirection`: Switches the direction of the
   ipython REPL terminal between `float`, and `vertical`. Requires a restart of
   the REPL.
 
@@ -134,7 +132,7 @@ and runs your script with the ipython magic `%run your_script.py`.
 
 By default the terminal will start in the Python environment as available at
 the prompt where Neovim is started. You can also switch to another virtual
-environment with `:PickPythonEnv`, which searches for Python virtual
+environment with `:TogglePyPickEnv`, which searches for Python virtual
 environments on your system and allows you to pick one with telescope.nvim.
 
 It is recommended to use the ipython REPL with the `autoreload` extension
