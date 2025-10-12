@@ -301,8 +301,10 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.keymap.set("n", "<F9>", function()
 	if ipy_term == nil then
 		vim.cmd("TogglePyTerminal")
+		-- TODO: this does not work as intended, as buffer changes after it
 		vim.cmd("TogglePySendLine")
 	else
+		-- TODO: this no longer seems to work
 		vim.cmd("TogglePySendLine")
 	end
 end, { noremap = true, silent = true, desc = "Send current line to IPython terminal" })
