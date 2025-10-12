@@ -300,8 +300,11 @@ vim.api.nvim_create_autocmd("FileType", {
 -- Key mappings for the IPython terminal
 vim.keymap.set("n", "<F9>", function()
 	if ipy_term == nil then
+		local current_win = vim.api.nvim_get_current_win()
 		vim.cmd("TogglePyTerminal")
-		-- TODO: this does not work as intended, as buffer changes after it
+		if vim.api.nvim_win_is_valid(current_win) then
+			vim.api.nvim_set_current_win(current_win)
+		end
 		vim.cmd("TogglePySendLine")
 	else
 		vim.cmd("TogglePySendLine")
