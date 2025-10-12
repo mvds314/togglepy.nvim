@@ -304,7 +304,6 @@ vim.keymap.set("n", "<F9>", function()
 		-- TODO: this does not work as intended, as buffer changes after it
 		vim.cmd("TogglePySendLine")
 	else
-		-- TODO: this no longer seems to work
 		vim.cmd("TogglePySendLine")
 	end
 end, { noremap = true, silent = true, desc = "Send current line to IPython terminal" })
