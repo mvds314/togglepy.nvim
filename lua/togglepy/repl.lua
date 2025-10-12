@@ -310,6 +310,7 @@ vim.keymap.set("n", "<F9>", function()
 		vim.cmd("TogglePySendLine")
 	end
 end, { noremap = true, silent = true, desc = "Send current line to IPython terminal" })
+-- TODO: also fix this mapping in the same way
 vim.keymap.set("v", "<F9>", function()
 	if vim.bo.filetype ~= "python" then
 		vim.notify("This only works for Python files", vim.log.levels.WARN)
