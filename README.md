@@ -91,11 +91,11 @@ require("lazy").setup({
 
 ## How It Works
 
-When you open a Python file and use the `:ToggleIPythonTerm` command, a special `toggleterm` terminal is created that starts `ipython` by default. This terminal is remembered by `togglepy.nvim` until its buffer is closed and is used for all REPL interactions.
+When you open a Python file and use the `:TogglePyTerminal` command, a special `toggleterm` terminal is created that starts `ipython` by default. This terminal is remembered by `togglepy.nvim` until its buffer is closed and is used for all REPL interactions.
 
 ### Commands
 
-- `:ToggleIPythonTerm`: Creates or toggles the IPython REPL terminal.
+- `:TogglePyTerminal`: Creates or toggles the IPython REPL terminal.
 - `:RunIpyFile`: Saves all buffers, changes the working directory in the REPL to the file's location, and runs the current Python file using `%run your_script.py`.
 - `:PickPythonEnv`: Searches for Python environments on your system and allows you to pick one with `telescope.nvim`.
 - `:ClearPythonEnvs`: Clears the list of found Python virtual environments.

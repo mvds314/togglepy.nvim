@@ -260,7 +260,7 @@ vim.api.nvim_create_user_command("ClearPythonEnvs", function()
 	vim.notify("Cleared Python environments")
 end, { desc = "Clear Python environments" })
 -- Create a command to toggle the IPython terminal
-vim.api.nvim_create_user_command("ToggleIPythonTerm", function()
+vim.api.nvim_create_user_command("TogglePyTerminal", function()
 	create_or_get_ipython_terminal(nil)
 end, { desc = "Toggle IPython terminal" })
 -- Command to switch terminal direction
