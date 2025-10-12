@@ -246,11 +246,11 @@ local function in_debug_mode()
 	return false
 end
 
--------------------------------- Set up commands and mappings --------------------------------
+-------------------------------- Set up commands --------------------------------
 
 -- TODO: create user commands instead of keymaps
 
--- Create a command to pick Python environment
+-- Create a command to pick Python environments
 vim.api.nvim_create_user_command("PickPythonEnv", function()
 	pick_python_env()
 end, { desc = "Pick Python environment" })
@@ -259,10 +259,6 @@ vim.api.nvim_create_user_command("ClearPythonEnvs", function()
 	python_envs = nil
 	vim.notify("Cleared Python environments")
 end, { desc = "Clear Python environments" })
--- Run the current Python file in IPython terminal
-vim.api.nvim_create_user_command("RunIpyFile", function()
-	run_python_file_in_ipython_terminal()
-end, { desc = "Run current Python file in IPython terminal" })
 -- Create a command to toggle the IPython terminal
 vim.api.nvim_create_user_command("ToggleIPythonTerm", function()
 	create_or_get_ipython_terminal(nil)
@@ -276,19 +272,39 @@ vim.api.nvim_create_user_command("SwitchIPythonTerminalDirection", function()
 	end
 	vim.notify("Terminal direction set to: " .. terminal_direction)
 end, { desc = "Switch terminal split direction" })
+
+-- These commands should only be available for Python files
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "python",
+	callback = function()
+		-- Run the current Python file in IPython terminal
+		vim.api.nvim_create_user_command("TogglePyRunFile", function()
+			run_python_file_in_ipython_terminal()
+		end, { desc = "Run current Python file in IPython terminal" })
+		-- Send lines or visual selection to the IPython terminal
+		vim.api.nvim_create_user_command("IpySendLine", function(opts)
+			if vim.bo.filetype ~= "python" then
+				vim.notify("This only works for Python files", vim.log.levels.WARN)
+				return
+			end
+			blink.current_line(50)
+			vim.cmd("ToggleTermSendCurrentLine " .. vim.v.count1)
+			vim.schedule(function()
+				vim.cmd("stopinsert")
+			end)
+			helpers.move_to_next_non_empty_line()
+		end, { desc = "Send current line to IPython terminal", range = true })
+	end,
+})
 -- Make these keymaps optional or configurable
 -- Key mappings for the IPython terminal
 vim.keymap.set("n", "<F9>", function()
-	if vim.bo.filetype ~= "python" then
-		vim.notify("This only works for Python files", vim.log.levels.WARN)
-		return
+	if ipy_term == nil then
+		-- TODO: implement this one
+		vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+	else
+		vim.cmd("TogglePySendLine")
 	end
-	blink.current_line(50)
-	vim.cmd("ToggleTermSendCurrentLine " .. vim.v.count1)
-	vim.schedule(function()
-		vim.cmd("stopinsert")
-	end)
-	helpers.move_to_next_non_empty_line()
 end, { noremap = true, silent = true, desc = "Send current line to IPython terminal" })
 vim.keymap.set("v", "<F9>", function()
 	if vim.bo.filetype ~= "python" then
@@ -309,9 +325,9 @@ vim.keymap.set("v", "<F9>", function()
 end, { noremap = true, silent = true, desc = "Send visual selection to IPython terminal" })
 vim.keymap.set({ "n", "i", "v" }, "<F5>", function()
 	if ipy_term == nil then
-		vim.cmd("RunIpyFile")
+		vim.cmd("TogglePyRunFile")
 	elseif not in_debug_mode() then
-		vim.cmd("RunIpyFile")
+		vim.cmd("TogglePyRunFile")
 	else
 		ipy_term:send("continue", false)
 	end
