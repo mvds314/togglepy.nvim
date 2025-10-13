@@ -280,10 +280,15 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = function()
 		-- Run the current Python file in IPython terminal
 		vim.api.nvim_create_user_command("TogglePyRunFile", function()
-			run_python_file_in_ipython_terminal()
+			if M.in_debug_mode() then
+				vim.notify("Cannot run file while in debug mode", vim.log.levels.WARN)
+				return
+			else
+				M.run_python_file_in_ipython_terminal()
+			end
 		end, { desc = "Run current Python file in IPython terminal" })
 		-- Send lines or visual selection to the IPython terminal
-		vim.api.nvim_create_user_command("TogglePySendLine", function(opts)
+		vim.api.nvim_create_user_command("TogglePySendLine", function()
 			if vim.bo.filetype ~= "python" then
 				vim.notify("This only works for Python files", vim.log.levels.WARN)
 				return
@@ -295,6 +300,17 @@ vim.api.nvim_create_autocmd("FileType", {
 			end)
 			helpers.move_to_next_non_empty_line()
 		end, { desc = "Send current line to IPython terminal", range = true })
+		-- Debug continue
+		vim.api.nvim_create_user_command("TogglePyDebugContinue", function()
+			if ipy_term == nil then
+				vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+				return
+			elseif not M.in_debug_mode() then
+				vim.notify("Not in debug mode", vim.log.levels.WARN)
+			else
+				ipy_term:send("continue", false)
+			end
+		end, { desc = "Debug continue" })
 	end,
 })
 -- Make these keymaps optional or configurable
@@ -329,15 +345,6 @@ vim.keymap.set("v", "<F9>", function()
 	blink.selection(50, start_line, end_line, start_col, end_col)
 	vim.cmd("ToggleTermSendVisualSelection " .. vim.v.count1)
 end, { noremap = true, silent = true, desc = "Send visual selection to IPython terminal" })
-vim.keymap.set({ "n", "i", "v" }, "<F5>", function()
-	if ipy_term == nil then
-		vim.cmd("TogglePyRunFile")
-	elseif not in_debug_mode() then
-		vim.cmd("TogglePyRunFile")
-	else
-		ipy_term:send("continue", false)
-	end
-end, { noremap = true, silent = true, desc = "Run/Continue" })
 vim.keymap.set("n", "<F10>", function()
 	if ipy_term == nil then
 		vim.notify("IPython terminal is not open", vim.log.levels.WARN)
