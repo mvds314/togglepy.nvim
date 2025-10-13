@@ -10,7 +10,7 @@ local helpers = require("togglepy.helpers")
 -- Local variable to store preferred terminal direction
 local terminal_direction = "vertical"
 
--- TODO: decide which functions to expose in the module
+-- TODO: decide which functions to expose in the module -> Base that on what is used in mappings
 local create_or_get_ipython_terminal = function(cmd)
 	local Terminal = require("toggleterm.terminal").Terminal
 	if not cmd then
