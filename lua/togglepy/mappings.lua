@@ -1,5 +1,9 @@
 local M = {}
 
+local repl = require("togglepy.repl")
+local blink = require("togglepy.blink")
+
+-- TODO: set these defaults everywhere else too
 function M.setup(opts)
 	-- Set default options
 	opts = vim.tbl_deep_extend("force", {
@@ -21,21 +25,75 @@ function M.setup(opts)
 				vim.keymap.set("t", "<C-w>k", "<C-\\><C-n><C-w>k", { noremap = true })
 				vim.keymap.set("t", "<C-w>l", "<C-\\><C-n><C-w>l", { noremap = true })
 			end
+			-- Define Run/continue key mapping
 			if opts.run_key then
 				vim.keymap.set({ "n", "i", "v" }, "<F5>", function()
-					if ipy_term == nil then
-						vim.cmd("TogglePyRunFile")
-					elseif not in_debug_mode() then
+					if not repl.in_debug_mode() then
 						vim.cmd("TogglePyRunFile")
 					else
 						vim.cmd("TogglePyDebugContinue")
 					end
 				end, { noremap = true, silent = true, desc = "Run/Continue" })
 			end
+			-- Define debug next key mapping
+			if opts.next_key then
+				vim.keymap.set("n", opts.next_key, function()
+					vim.cmd("TogglePyDebugNext")
+				end, { noremap = true, silent = true, desc = "Debug next" })
+			end
+			-- Define step in and step key mappings
+			if opts.step_in_key then
+				vim.keymap.set("n", opts.step_in_key, function()
+					vim.cmd("TogglePyDebugStep")
+				end, { noremap = true, silent = true, desc = "Debug step in" })
+			end
+			-- Define step out/return key mapping
+			if opts.step_out_key then
+				vim.keymap.set("n", opts.step_out_key, function()
+					vim.cmd("TogglePyDebugReturn")
+				end, { noremap = true, silent = true, desc = "Step out/return" })
+			end
+			-- Define send to terminal mappings
+			if opts.send_key then
+				vim.keymap.set("n", opts.send_key, function()
+					-- Ensure the REPL is running
+					if not repl.repl_running() then
+						local current_win = vim.api.nvim_get_current_win()
+						vim.cmd("TogglePyTerminal")
+						if vim.api.nvim_win_is_valid(current_win) then
+							vim.api.nvim_set_current_win(current_win)
+						end
+					end
+					-- Send and blink the current line
+					vim.cmd("TogglePySendLine")
+				end, { noremap = true, silent = true, desc = "Send current line to IPython terminal" })
+				vim.keymap.set("v", opts.send_key, function()
+					-- Ensure the REPL is running
+					if not repl.repl_running() then
+						local current_win = vim.api.nvim_get_current_win()
+						vim.cmd("TogglePyTerminal")
+						if vim.api.nvim_win_is_valid(current_win) then
+							vim.api.nvim_set_current_win(current_win)
+						end
+					end
+					-- Get the visual selection range
+					local start_pos = vim.fn.getpos("v")
+					local end_pos = vim.fn.getpos(".")
+					if start_pos[2] > end_pos[2] or (start_pos[2] == end_pos[2] and start_pos[3] > end_pos[3]) then
+						start_pos, end_pos = end_pos, start_pos
+					end
+					local start_line = start_pos[2] - 1
+					local start_col = start_pos[3] - 1
+					local end_line = end_pos[2] - 1
+					local end_col = end_pos[3]
+					-- blink the selection
+					blink.selection(50, start_line, end_line, start_col, end_col)
+					-- Send the visual selection to the REPL
+					vim.cmd("ToggleTermSendVisualSelection " .. vim.v.count1)
+				end, { noremap = true, silent = true, desc = "Send visual selection to IPython terminal" })
+			end
 		end,
 	})
 end
-
--- TODO: configure the DAPui look and feel for this option
 
 return M
