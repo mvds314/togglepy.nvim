@@ -1,3 +1,4 @@
+local M = {}
 -- Stores the ipython terminal instance
 local ipy_term = nil
 -- Stores the preferred Python environment
@@ -11,7 +12,7 @@ local helpers = require("togglepy.helpers")
 local terminal_direction = "vertical"
 
 -- TODO: decide which functions to expose in the module -> Base that on what is used in mappings
-local create_or_get_ipython_terminal = function(cmd)
+M.create_or_get_ipython_terminal = function(cmd)
 	local Terminal = require("toggleterm.terminal").Terminal
 	if not cmd then
 		local python_env = current_python_env or "python"
@@ -37,7 +38,7 @@ local create_or_get_ipython_terminal = function(cmd)
 	return ipy_term
 end
 
-local run_python_file_in_ipython_terminal = function()
+M.run_python_file_in_ipython_terminal = function()
 	-- Check if the current buffer is a Python file
 	if vim.bo.filetype ~= "python" then
 		vim.notify("This only works for Python files", vim.log.levels.WARN)
@@ -58,7 +59,7 @@ local run_python_file_in_ipython_terminal = function()
 	-- Ignore IPython warnings about running inside a virtual environment
 	local python_env = current_python_env or "python"
 	local cmd = string.format('"%s" -W "ignore:.*interactiveshell.py:UserWarning" -m IPython', python_env)
-	ipy_term = create_or_get_ipython_terminal(cmd)
+	ipy_term = M.create_or_get_ipython_terminal(cmd)
 	file = string.gsub(file, "[\r\n]+$", "")
 	-- Change to the file's directory before running
 	local file_dir = vim.fn.fnamemodify(file, ":h")
@@ -69,7 +70,7 @@ local run_python_file_in_ipython_terminal = function()
 	-- ipy_term:send("\x15" .. string.format("%%run %s", file), false)
 end
 
-local function find_python_envs_on_linux()
+M.find_python_envs_on_linux = function()
 	local envs = {}
 	-- Linux/MacOS
 	local find_cmd =
@@ -84,7 +85,7 @@ local function find_python_envs_on_linux()
 	return envs
 end
 
-local function find_python_envs_on_windows()
+M.find_python_envs_on_windows = function()
 	local envs = {}
 	-- Only check common install locations, avoid recursive search for speed
 	-- Add all miniconda3 folders
@@ -145,18 +146,18 @@ local function find_python_envs_on_windows()
 end
 
 -- TODO: make the search paths configurable
-local function find_python_envs()
+M.find_python_envs = function()
 	---@diagnostic disable-next-line: undefined-field
 	local is_windows = vim.loop.os_uname().version:match("Windows")
 	if is_windows then
-		return find_python_envs_on_windows()
+		return M.find_python_envs_on_windows()
 	else
-		return find_python_envs_on_linux()
+		return M.find_python_envs_on_linux()
 	end
 end
 
 -- TODO test this one
-local function pick_python_env_async()
+M.pick_python_env_async = function()
 	local pickers = require("telescope.pickers")
 	local finders = require("telescope.finders")
 	local actions = require("telescope.actions")
@@ -193,7 +194,7 @@ local function pick_python_env_async()
 	end)
 end
 
-local function pick_python_env()
+M.pick_python_env = function()
 	local pickers = require("telescope.pickers")
 	local finders = require("telescope.finders")
 	local actions = require("telescope.actions")
@@ -201,7 +202,7 @@ local function pick_python_env()
 	local conf = require("telescope.config").values
 	-- Find python executables in common locations
 	if not python_envs then
-		python_envs = find_python_envs()
+		python_envs = M.find_python_envs()
 	end
 	pickers
 		.new({}, {
@@ -221,7 +222,7 @@ local function pick_python_env()
 		:find()
 end
 
-local function in_debug_mode()
+M.in_debug_mode = function()
 	if not ipy_term or not ipy_term.bufnr then
 		vim.notify("IPython terminal is not open", vim.log.levels.WARN)
 		return false
@@ -252,7 +253,7 @@ end
 
 -- Create a command to pick Python environments
 vim.api.nvim_create_user_command("TogglePyPickEnv", function()
-	pick_python_env()
+	M.pick_python_env()
 end, { desc = "Pick Python environment" })
 -- Create a command to clear Python environments
 vim.api.nvim_create_user_command("TogglePyClearEnvs", function()
@@ -261,7 +262,7 @@ vim.api.nvim_create_user_command("TogglePyClearEnvs", function()
 end, { desc = "Clear Python environments" })
 -- Create a command to toggle the IPython terminal
 vim.api.nvim_create_user_command("TogglePyTerminal", function()
-	create_or_get_ipython_terminal(nil)
+	M.create_or_get_ipython_terminal(nil)
 end, { desc = "Toggle IPython terminal" })
 -- Command to switch terminal direction
 vim.api.nvim_create_user_command("TogglePySwitchTerminalDirection", function()
@@ -341,7 +342,7 @@ vim.keymap.set("n", "<F10>", function()
 	if ipy_term == nil then
 		vim.notify("IPython terminal is not open", vim.log.levels.WARN)
 		return
-	elseif not in_debug_mode() then
+	elseif not M.in_debug_mode() then
 		vim.notify("Not in debug mode", vim.log.levels.WARN)
 	else
 		ipy_term:send("next", false)
@@ -351,7 +352,7 @@ vim.keymap.set("n", "<F11>", function()
 	if ipy_term == nil then
 		vim.notify("IPython terminal is not open", vim.log.levels.WARN)
 		return
-	elseif not in_debug_mode() then
+	elseif not M.in_debug_mode() then
 		vim.notify("Not in debug mode", vim.log.levels.WARN)
 	else
 		ipy_term:send("step", false)
@@ -361,9 +362,11 @@ vim.keymap.set("n", "<S-F11>", function()
 	if ipy_term == nil then
 		vim.notify("IPython terminal is not open", vim.log.levels.WARN)
 		return
-	elseif not in_debug_mode() then
+	elseif not M.in_debug_mode() then
 		vim.notify("Not in debug mode", vim.log.levels.WARN)
 	else
 		ipy_term:send("r", false)
 	end
 end, { noremap = true, silent = true, desc = "Step out/return" })
+
+return M
