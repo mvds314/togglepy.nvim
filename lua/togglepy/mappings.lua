@@ -32,12 +32,11 @@ function M.setup(opts)
 			if opts.run_key then
 				if buf then
 					vim.keymap.set({ "n", "i", "v" }, "<F5>", function()
-						vim.notify("Running Python file...", vim.log.levels.INFO)
-						-- if not repl.in_debug_mode() then
-						-- 	vim.cmd("TogglePyRunFile")
-						-- else
-						-- 	vim.cmd("TogglePyDebugContinue")
-						-- end
+						if not repl.in_debug_mode() then
+							vim.cmd("TogglePyRunFile")
+						else
+							vim.cmd("TogglePyDebugContinue")
+						end
 					end, { buf = buf, noremap = true, silent = true, desc = "Run/Continue" })
 				else
 					vim.notify("Buffer not found for key mapping " .. opts.run_key, vim.log.levels.ERROR)
