@@ -31,7 +31,7 @@ function M.setup(opts)
 			-- Define Run/continue key mapping
 			if opts.run_key then
 				if buf then
-					vim.keymap.set({ "n", "i", "v" }, "<F5>", function()
+					vim.keymap.set({ "n", "i", "v" }, opts.run_key, function()
 						if not repl.in_debug_mode() then
 							vim.cmd("TogglePyRunFile")
 						else
