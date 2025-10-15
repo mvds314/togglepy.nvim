@@ -1,6 +1,11 @@
 local M = {}
 
 function M.setup(opts)
+	-- Default options
+	opts = vim.tbl_deep_extend("force", {
+		host = "localhost",
+		port = 9000,
+	}, opts or {})
 	opts = opts or {}
 	local dap_ok, dap = pcall(require, "dap")
 	if not dap_ok then
@@ -10,8 +15,8 @@ function M.setup(opts)
 
 	dap.adapters.ipdb = {
 		type = "server",
-		host = opts.host or "localhost",
-		port = opts.port or 9000,
+		host = opts.host,
+		port = opts.port,
 	}
 
 	dap.configurations.python = dap.configurations.python or {}
