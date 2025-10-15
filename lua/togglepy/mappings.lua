@@ -37,16 +37,20 @@ function M.setup(opts)
 						else
 							vim.cmd("TogglePyDebugContinue")
 						end
-					end, { buf = buf, noremap = true, silent = true, desc = "Run/Continue" })
+					end, { buffer = buf, noremap = true, silent = true, desc = "Run/Continue" })
 				else
 					vim.notify("Buffer not found for key mapping " .. opts.run_key, vim.log.levels.ERROR)
 				end
 			end
 			-- Define debug next key mapping
 			if opts.next_key then
-				vim.keymap.set("n", opts.next_key, function()
-					vim.cmd("TogglePyDebugNext")
-				end, { noremap = true, silent = true, desc = "Debug next" })
+				if buf then
+					vim.keymap.set("n", opts.next_key, function()
+						vim.cmd("TogglePyDebugNext")
+					end, { buffer = buf, noremap = true, silent = true, desc = "Debug next" })
+				else
+					vim.notify("Buffer not found for key mapping " .. opts.next_key, vim.log.levels.ERROR)
+				end
 			end
 			-- Define step in and step key mappings
 			if opts.step_in_key then
@@ -72,23 +76,25 @@ function M.setup(opts)
 			if opts.send_key then
 				if not buf then
 					vim.notify("Buffer not found for key mapping " .. opts.send_key, vim.log.levels.ERROR)
-				end
-				vim.keymap.set("n", opts.send_key, function()
-					-- Ensure the REPL is running
-					if not repl.repl_running() then
-						local current_win = vim.api.nvim_get_current_win()
-						vim.cmd("TogglePyTerminal")
-						if vim.api.nvim_win_is_valid(current_win) then
-							vim.api.nvim_set_current_win(current_win)
-						end
-					end
-					-- Send and blink the current line
-					vim.cmd("TogglePySendLine")
-				end, { buffer = buf, noremap = true, silent = true, desc = "Send current line to IPython terminal" })
-				vim.keymap.set(
-					"v",
-					opts.send_key,
-					function()
+				else
+					vim.keymap.set(
+						"n",
+						opts.send_key,
+						function()
+							-- Ensure the REPL is running
+							if not repl.repl_running() then
+								local current_win = vim.api.nvim_get_current_win()
+								vim.cmd("TogglePyTerminal")
+								if vim.api.nvim_win_is_valid(current_win) then
+									vim.api.nvim_set_current_win(current_win)
+								end
+							end
+							-- Send and blink the current line
+							vim.cmd("TogglePySendLine")
+						end,
+						{ buffer = buf, noremap = true, silent = true, desc = "Send current line to IPython terminal" }
+					)
+					vim.keymap.set("v", opts.send_key, function()
 						-- Ensure the REPL is running
 						if not repl.repl_running() then
 							local current_win = vim.api.nvim_get_current_win()
@@ -111,9 +117,13 @@ function M.setup(opts)
 						blink.selection(50, start_line, end_line, start_col, end_col)
 						-- Send the visual selection to the REPL
 						vim.cmd("ToggleTermSendVisualSelection " .. vim.v.count1)
-					end,
-					{ buffer = buf, noremap = true, silent = true, desc = "Send visual selection to IPython terminal" }
-				)
+					end, {
+						buffer = buf,
+						noremap = true,
+						silent = true,
+						desc = "Send visual selection to IPython terminal",
+					})
+				end
 			end
 		end,
 	})
