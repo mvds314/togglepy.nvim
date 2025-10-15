@@ -8,6 +8,8 @@ function M.setup(opts)
 	-- local repl_opts = opts and opts.repl or {}
 	require("togglepy.ipdab").setup(ipdab_opts)
 	require("togglepy.repl")
+	-- Pass the mapping opts
+	require("togglepy.mappings").setup()
 end
 
 -- Auto-setup with defaults if setup() wasn't called explicitly
@@ -15,6 +17,7 @@ vim.schedule(function()
 	if not _setup_called then
 		require("togglepy.ipdab").setup()
 		require("togglepy.repl")
+		require("togglepy.mappings").setup()
 	end
 end)
 
