@@ -9,10 +9,9 @@ function M.setup(opts)
 	local mapping_opts = opts and opts.mappings or {}
 	-- local repl_opts = opts and opts.repl or {}
 	require("togglepy.ipdab").setup(ipdab_opts)
-	require("togglepy.repl")
-		-- Pass the mapping opts
-		.require("togglepy.mappings")
-		.setup(mapping_opts)
+	require("togglepy.repl").setup(repl_opts)
+	-- Pass the mapping opts
+	require("togglepy.mappings").setup(mapping_opts)
 end
 
 -- Auto-setup with defaults if setup() wasn't called explicitly
