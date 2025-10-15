@@ -11,6 +11,14 @@ local helpers = require("togglepy.helpers")
 -- Local variable to store preferred terminal direction
 local terminal_direction = "vertical"
 
+M.setup = function(opts)
+	-- Default options
+	opts = vim.tbl_deep_extend("force", {
+		terminal_direction = "vertical",
+	}, opts or {})
+	terminal_direction = opts.terminal_direction or terminal_direction
+end
+
 M.repl_running = function()
 	return ipy_term ~= nil
 end
@@ -82,6 +90,7 @@ M.run_python_file_in_ipython_terminal = function()
 	-- ipy_term:send("\x15" .. string.format("%%run %s", file), false)
 end
 
+-- Make these folders into an option
 M.find_python_envs_on_linux = function()
 	local envs = {}
 	-- Linux/MacOS
@@ -97,6 +106,7 @@ M.find_python_envs_on_linux = function()
 	return envs
 end
 
+-- TODO: make these folders into an option
 M.find_python_envs_on_windows = function()
 	local envs = {}
 	-- Only check common install locations, avoid recursive search for speed
