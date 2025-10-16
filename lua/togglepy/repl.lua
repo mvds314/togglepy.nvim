@@ -10,12 +10,21 @@ local blink = require("togglepy.blink")
 local helpers = require("togglepy.helpers")
 -- Local variable to store preferred terminal direction
 local terminal_direction = "vertical"
+-- Default search paths for Python environments on Linux/MacOS
+local linux_python_env_search_paths = {
+	"/usr/bin",
+	"/usr/local/bin",
+	"~/.pyenv/versions",
+	"~/.conda/envs",
+	"~/anaconda3/envs",
+}
 
 M.setup = function(opts)
 	-- Default options
 	opts = vim.tbl_deep_extend("force", {
 		terminal_direction = "vertical",
 	}, opts or {})
+	-- continue here and handle the Python env search paths for Linux/MacOS
 	terminal_direction = opts.terminal_direction or terminal_direction
 end
 
@@ -107,6 +116,12 @@ M.find_python_envs_on_linux = function()
 end
 
 -- TODO: make these folders into an option
+local windows_python_env_search_paths = {
+	-- Add all miniconda3 folders
+	os.getenv("USERPROFILE") .. "\\AppData\\Local\\miniconda3",
+	-- Add all C:\Software\WPy64* folders
+	"C:\\Software\\WPy64*",
+}
 M.find_python_envs_on_windows = function()
 	local envs = {}
 	-- Only check common install locations, avoid recursive search for speed
