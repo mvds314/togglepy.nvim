@@ -82,6 +82,7 @@ M.run_python_file_in_ipython_terminal = function()
 	ipy_term = M.create_or_get_ipython_terminal(cmd)
 	file = string.gsub(file, "[\r\n]+$", "")
 	-- Change to the file's directory before running
+	--TODO: clear the current line first before sending something
 	local file_dir = vim.fn.fnamemodify(file, ":h")
 	ipy_term:send(string.format('cd "%s"', file_dir), true)
 	-- clear line and send to terminal by sending Ctrl+U
