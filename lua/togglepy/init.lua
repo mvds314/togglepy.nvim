@@ -6,12 +6,12 @@ function M.setup(opts)
 	_setup_called = true
 	local ipdab_opts = opts and opts.ipdab or {}
 	local repl_opts = opts and opts.repl or {}
-	local mapping_opts = opts and opts.mappings or {}
+	local keymap_opts = opts and opts.keymaps or {}
 	-- local repl_opts = opts and opts.repl or {}
 	require("togglepy.ipdab").setup(ipdab_opts)
 	require("togglepy.repl").setup(repl_opts)
-	-- Pass the mapping opts
-	require("togglepy.mappings").setup(mapping_opts)
+	-- Pass the keymap options to the keymaps module
+	require("togglepy.keymaps").setup(keymap_opts)
 end
 
 -- Auto-setup with defaults if setup() wasn't called explicitly
@@ -21,6 +21,6 @@ vim.schedule(function()
 	end
 end)
 
--- TODO: write documentation for the plugin
+-- TODO: update documentation for the plugin
 
 return M
