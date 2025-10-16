@@ -3,7 +3,6 @@ local M = {}
 local repl = require("togglepy.repl")
 local blink = require("togglepy.blink")
 
--- TODO: set these defaults everywhere else too
 function M.setup(opts)
 	-- Set default options
 	opts = vim.tbl_deep_extend("force", {
