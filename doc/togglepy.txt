@@ -66,15 +66,43 @@ Set up with Lazy.nvim as follows
    config = function()
                 -- TODO: add configuration options
                 local opts = {host="localhost", port=9000}
+                local opts = { ipdab = { host = "localhost", port = 9000 },
+                               repl = { terminal_direction = "vertical" },
+                               keymaps = { window_navigation = true,
+                                           send_key = "<F9>",
+                                           run_key = "<F5>",
+                                           next_key = "<F10>",
+                                           step_in_key = "<F11>",
+                                           step_out_key = "<F12>",},
+                    }
                 require('togglepy').setup(opts)
              end,
  })
 <
 The `opts` table can contain the following fields:
-* 'host': An ip address where the DAP server should listen. Default is
-  `"localhost"`.
-* 'port': The port where the DAP server should listen. Default is `9000`.
+* 'ipdab': A table with options for the ipdab DAP server. It can contain the
+  following fields:
+  - `host`: An ip address where the DAP server should listen. Default is
+    `"localhost"`.
+  - `port`: The port where the DAP server should listen. Default is `900
 When empty or not passed, the default values as passed above are used.
+* 'repl': A table with options for the REPL terminal. It can contain the
+  following fields:
+  - `terminal_direction`: Direction of the REPL terminal, either `"float"` or
+    `"vertical"`. Default is `"vertical"`.
+* 'keymaps': A table with keymaps for REPL and debugging. It can contain the
+  following fields:
+  - `window_navigation`: Whether to set up window navigation keymaps, i.e.,
+    '<C-w>h/j/k/l' for terminal mode. Default is `true`.
+  - `send_key`: Key to send the current line or visual selection to the REPL
+    (default: `<F9>`).
+  - `run_key`: Key to run the current Python file in the REPL or to
+    continue in debug mode (default: `<F5>`).
+  - `next_key`: Key to step over in the debugger (default: `<F10>`).
+  - `step_in_key`: Key to step into in the debugger (default
+    `<F11>`).
+  - `step_out_key`: Key to step out/return in the debugger (default
+    `<F12>`).
 
 For best integration, set up the <C-\> key mapping to toggle the REPL 
 with toggleterm. The following is an example configuration a decent

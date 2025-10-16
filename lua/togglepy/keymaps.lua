@@ -3,8 +3,6 @@ local M = {}
 local repl = require("togglepy.repl")
 local blink = require("togglepy.blink")
 
--- TODO: add mapping settings to documentation
-
 -- TODO: set these defaults everywhere else too
 function M.setup(opts)
 	-- Set default options

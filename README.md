@@ -51,16 +51,31 @@ require("lazy").setup({
     'rcarriga/nvim-dap-ui',
   },
   config = function()
-    local opts = { host = "localhost", port = 9000 }
+    local opts = { ipdab = { host = "localhost", port = 9000 },
+                   repl = { terminal_direction = "vertical" },
+                   keymaps = { window_navigation = true,
+                               send_key = "<F9>",
+                               run_key = "<F5>",
+                               next_key = "<F10>",
+                               step_in_key = "<F11>",
+                               step_out_key = "<F12>",},
+        }
     require('togglepy').setup(opts)
   end,
 })
 ```
 
-The `opts` table can contain the following fields:
+The `opts` table can contains options for the different components of the plugin, which in turn contain the fields:
 
 - `host`: IP address where the DAP server should listen (default: `"localhost"`).
 - `port`: Port where the DAP server should listen (default: `9000`).
+- `terminal_direction`: Direction of the REPL terminal, either `"float"` or `"vertical"` (default: `"vertical"`).
+- `window_navigation`: Whether to set up window navigation keymaps, i.e., '<C-w>h/j/k/l' for terminal mode
+- `send_key`: Key to send the current line or visual selection to the REPL (default: `<F9>`).
+- `run_key`: Key to run the current Python file in the REPL or to continue in debug mode (default: `<F5>`).
+- `next_key`: Key to step over in the debugger (default: `<F10>`).
+- `step_in_key`: Key to step into in the debugger (default: `<F11>`).
+- `step_out_key`: Key to step out/return in the debugger (default: `<F12>`).
 
 ### Recommended Configuration
 
