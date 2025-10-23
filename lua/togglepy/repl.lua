@@ -1,4 +1,7 @@
 local M = {}
+-- Check if the OS is Windows
+---@diagnostic disable-next-line: undefined-field
+local is_windows = vim.loop.os_uname().version:match("Windows")
 -- Stores the ipython terminal instance
 local ipy_term = nil
 -- Stores the preferred Python environment
@@ -11,21 +14,23 @@ local helpers = require("togglepy.helpers")
 -- Local variable to store preferred terminal direction
 local terminal_direction = "vertical"
 -- Default search paths for Python environments on Linux/MacOS
-local linux_python_env_search_paths = {
-	"/usr/bin",
-	"/usr/local/bin",
-	"~/.pyenv/versions",
-	"~/.conda/envs",
-	"~/anaconda3/envs",
-}
+local python_env_search_paths = {}
+local add_miniconda = true
+local add_system_path = true
 
 M.setup = function(opts)
 	-- Default options
 	opts = vim.tbl_deep_extend("force", {
 		terminal_direction = "vertical",
+		search_paths = {},
+		add_miniconda = true,
+		add_system_path = true,
 	}, opts or {})
-	-- continue here and handle the Python env search paths for Linux/MacOS
-	terminal_direction = opts.terminal_direction or terminal_direction
+	-- Set the options as global variables in the module
+	terminal_direction = opts.terminal_direction
+	python_env_search_paths = opts.search_paths
+	add_miniconda = opts.add_miniconda
+	add_system_path = opts.add_system_path
 end
 
 M.repl_running = function()
@@ -100,15 +105,33 @@ M.run_python_file_in_ipython_terminal = function()
 end
 
 -- Make these folders into an option
-M.find_python_envs_on_linux = function()
-	local envs = {}
-	-- Linux/MacOS
-	local find_cmd =
-		[[find -L /usr/bin /usr/local/bin ~/.pyenv/versions ~/.conda/envs ~/anaconda3/envs -type f -name python 2>/dev/null; which python]]
+-- TODO: test this logic
+M.find_python_envs_on_linux = function(search_paths)
+	-- Check if the OS is not Windows
+	if is_windows then
+		vim.notify("This function is not for Windows", vim.log.levels.ERROR)
+	end
+	-- Initialize search paths
+	search_paths = vim.list_extend(search_paths or {}, {
+		"/usr/bin",
+		"/usr/local/bin",
+		"~/.pyenv/versions",
+	})
+	-- Linux default locations
+	if add_miniconda then
+		table.insert(search_paths, "~/.conda/envs")
+		table.insert(search_paths, "~/anaconda3/envs")
+	end
+	local find_cmd = [[find -L ]] .. table.concat(search_paths, " ") .. [[ -type f -name python 2>/dev/null;]]
+	if add_system_path then
+		find_cmd = find_cmd .. " which -a python 2>/dev/null"
+	end
 	local linux_handle = io.popen(find_cmd)
+	-- Process the output
+	local envs = {}
 	if linux_handle then
 		for line in linux_handle:lines() do
-			table.insert(envs, line)
+			envs = table.insert(envs, line)
 		end
 		linux_handle:close()
 	end
@@ -116,53 +139,31 @@ M.find_python_envs_on_linux = function()
 end
 
 -- TODO: make these folders into an option
-local windows_python_env_search_paths = {
-	-- Add all miniconda3 folders
-	os.getenv("USERPROFILE") .. "\\AppData\\Local\\miniconda3",
-	-- Add all C:\Software\WPy64* folders
-	"C:\\Software\\WPy64*",
-}
-M.find_python_envs_on_windows = function()
-	local envs = {}
-	-- Only check common install locations, avoid recursive search for speed
-	-- Add all miniconda3 folders
-	local candidates = {
-		os.getenv("USERPROFILE") .. "\\AppData\\Local\\miniconda3",
-	}
-	-- Add all miniconda3 envs folders
-	local miniconda_envs = os.getenv("USERPROFILE") .. "\\AppData\\Local\\miniconda3\\envs"
-	local envs_handle = io.popen('dir /b /ad "' .. miniconda_envs .. '" 2>nul')
-	if envs_handle then
-		for folder in envs_handle:lines() do
-			table.insert(candidates, miniconda_envs .. "\\" .. folder)
-		end
-		envs_handle:close()
+-- TODO: continue here and check this logic
+M.find_python_envs_on_windows = function(search_paths)
+	-- Check if the OS is Windows
+	if not is_windows then
+		vim.notify("This function is only for Windows", vim.log.levels.ERROR)
 	end
-	-- Add all C:\Software\WPy64* folders
-	local wpy_handle = io.popen('dir /b /ad "C:\\Software\\WPy64*" 2>nul')
-	if wpy_handle then
-		for folder in wpy_handle:lines() do
-			local wpy_python_handle = io.popen('dir /b /ad "C:\\Software\\' .. folder .. '\\python*" 2>nul')
-			if wpy_python_handle then
-				for subfolder in wpy_python_handle:lines() do
-					table.insert(candidates, "C:\\Software\\" .. folder .. "\\" .. subfolder)
-				end
-				wpy_python_handle:close()
+	-- Initialize candidate folders to search for python executables
+	search_paths = search_paths or {}
+	-- Add miniconda paths
+	if add_miniconda then
+		-- Add all miniconda3 folders to search paths
+		search_paths = table.insert(search_paths, os.getenv("USERPROFILE") .. "\\AppData\\Local\\miniconda3")
+		-- Add all miniconda3 envs folders to search paths
+		local miniconda_envs = os.getenv("USERPROFILE") .. "\\AppData\\Local\\miniconda3\\envs"
+		local envs_handle = io.popen('dir /b /ad "' .. miniconda_envs .. '" 2>nul')
+		if envs_handle then
+			for folder in envs_handle:lines() do
+				table.insert(search_paths, folder)
 			end
-			local envs_dir = "C:\\Software\\" .. folder .. "\\envs"
-			-- Add all subfolders of the environments folder
-			envs_handle = io.popen('dir /b /ad "' .. envs_dir .. '" 2>nul')
-			if envs_handle then
-				for subenv in envs_handle:lines() do
-					table.insert(candidates, envs_dir .. "\\" .. subenv .. "\\Scripts")
-				end
-				envs_handle:close()
-			end
+			envs_handle:close()
 		end
-		wpy_handle:close()
 	end
 	-- Process candidate folders
-	for _, dir in ipairs(candidates) do
+	local envs = {}
+	for _, dir in ipairs(search_paths) do
 		local handle = io.popen('dir /b "' .. dir .. '\\python.exe" 2>nul')
 		if handle then
 			for line in handle:lines() do
@@ -172,24 +173,23 @@ M.find_python_envs_on_windows = function()
 		end
 	end
 	-- Also add python from PATH
-	local handle = io.popen("where python 2>nul")
-	if handle then
-		for line in handle:lines() do
-			table.insert(envs, line)
+	if add_system_path then
+		local handle = io.popen("where python 2>nul")
+		if handle then
+			for line in handle:lines() do
+				table.insert(envs, line)
+			end
+			handle:close()
 		end
-		handle:close()
 	end
 	return envs
 end
 
--- TODO: make the search paths configurable
 M.find_python_envs = function()
-	---@diagnostic disable-next-line: undefined-field
-	local is_windows = vim.loop.os_uname().version:match("Windows")
 	if is_windows then
-		return M.find_python_envs_on_windows()
+		return M.find_python_envs_on_windows(python_env_search_paths)
 	else
-		return M.find_python_envs_on_linux()
+		return M.find_python_envs_on_linux(python_env_search_paths)
 	end
 end
 
