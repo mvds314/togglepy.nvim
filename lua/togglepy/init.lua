@@ -4,9 +4,10 @@ local _setup_called = false
 
 function M.setup(opts)
 	_setup_called = true
-	local ipdab_opts = opts and opts.ipdab or {}
-	local repl_opts = opts and opts.repl or {}
-	local keymap_opts = opts and opts.keymaps or {}
+	opts = opts or {}
+	local ipdab_opts = opts.ipdab or {}
+	local repl_opts = opts.repl or {}
+	local keymap_opts = opts.keymaps or {}
 	-- local repl_opts = opts and opts.repl or {}
 	require("togglepy.ipdab").setup(ipdab_opts)
 	require("togglepy.repl").setup(repl_opts)
