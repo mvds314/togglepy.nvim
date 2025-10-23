@@ -104,7 +104,6 @@ M.run_python_file_in_ipython_terminal = function()
 	-- ipy_term:send("\x15" .. string.format("%%run %s", file), false)
 end
 
--- Make these folders into an option
 -- TODO: test this logic
 M.find_python_envs_on_linux = function(search_paths)
 	-- Check if the OS is not Windows
@@ -131,15 +130,14 @@ M.find_python_envs_on_linux = function(search_paths)
 	local envs = {}
 	if linux_handle then
 		for line in linux_handle:lines() do
-			envs = table.insert(envs, line)
+			table.insert(envs, line)
 		end
 		linux_handle:close()
 	end
 	return envs
 end
 
--- TODO: make these folders into an option
--- TODO: continue here and check this logic
+-- TODO: test this logic
 M.find_python_envs_on_windows = function(search_paths)
 	-- Check if the OS is Windows
 	if not is_windows then
@@ -150,7 +148,7 @@ M.find_python_envs_on_windows = function(search_paths)
 	-- Add miniconda paths
 	if add_miniconda then
 		-- Add all miniconda3 folders to search paths
-		search_paths = table.insert(search_paths, os.getenv("USERPROFILE") .. "\\AppData\\Local\\miniconda3")
+		table.insert(search_paths, os.getenv("USERPROFILE") .. "\\AppData\\Local\\miniconda3")
 		-- Add all miniconda3 envs folders to search paths
 		local miniconda_envs = os.getenv("USERPROFILE") .. "\\AppData\\Local\\miniconda3\\envs"
 		local envs_handle = io.popen('dir /b /ad "' .. miniconda_envs .. '" 2>nul')
