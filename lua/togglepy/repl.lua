@@ -20,18 +20,27 @@ local add_system_path = true
 
 M.setup = function(opts)
 	-- Default options
+	-- The problem is that no opts seem to be passed
+	for k, v in ipairs(opts) do
+		print("Option " .. k .. " = " .. tostring(v))
+	end
+	-- vim.notify("TogglePy setup called with " .. #opts.search_paths .. " search paths")
 	opts = vim.tbl_deep_extend("force", {
 		terminal_direction = "vertical",
 		search_paths = {},
 		add_miniconda = true,
 		add_system_path = true,
 	}, opts or {})
+	local test = opts.test or 0
+	-- vim.notify("TogglePy setup called with test=" .. tostring(test))
 	-- Set the options as global variables in the module
 	terminal_direction = opts.terminal_direction
-	python_env_search_paths = opts.search_paths
+	python_env_search_paths = vim.list_extend({}, opts.search_paths)
+	-- vim.notify("We now have " .. #python_env_search_paths .. " search paths for Python envs")
 	add_miniconda = opts.add_miniconda
 	add_system_path = opts.add_system_path
 end
+--TODO: check the entire find Python env logic
 
 M.repl_running = function()
 	return ipy_term ~= nil
@@ -145,6 +154,8 @@ M.find_python_envs_on_windows = function(search_paths)
 	end
 	-- Initialize candidate folders to search for python executables
 	search_paths = search_paths or {}
+	-- TODO: continue here, why is this one set to 0 paths?
+	vim.notify("Searching Python environments in " .. #search_paths .. " paths")
 	-- Add miniconda paths
 	if add_miniconda then
 		-- Add all miniconda3 folders to search paths
@@ -180,10 +191,12 @@ M.find_python_envs_on_windows = function(search_paths)
 			handle:close()
 		end
 	end
+	vim.notify("Found " .. tostring(#envs) .. " Python environments")
 	return envs
 end
 
 M.find_python_envs = function()
+	vim.notify("Searching for Python environments...")
 	if is_windows then
 		return M.find_python_envs_on_windows(python_env_search_paths)
 	else
@@ -235,8 +248,10 @@ M.pick_python_env = function()
 	local actions = require("telescope.actions")
 	local action_state = require("telescope.actions.state")
 	local conf = require("telescope.config").values
+	vim.notify("Preparing Python environments...")
 	-- Find python executables in common locations
 	if not python_envs then
+		vim.notify("None found yet, searching now...")
 		python_envs = M.find_python_envs()
 	end
 	pickers
