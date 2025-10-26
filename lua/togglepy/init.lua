@@ -7,7 +7,6 @@ function M.setup(opts)
 		vim.notify("togglepy.nvim: setup() called again, should not happen by default", vim.log.levels.WARN)
 	else
 		_setup_called = true -- Prevent race condition
-		vim.notify("togglepy.nvim: calling setup", vim.log.levels.INFO)
 	end
 	opts = opts or {}
 	local ipdab_opts = opts.ipdab or {}
