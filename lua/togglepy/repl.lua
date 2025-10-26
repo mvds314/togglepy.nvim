@@ -143,7 +143,7 @@ M.find_python_envs_on_linux = function(search_paths)
 		end
 		linux_handle:close()
 	end
-	return envs
+	return helpers.drop_duplicates(envs)
 end
 
 -- TODO: test this logic
