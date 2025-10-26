@@ -33,11 +33,9 @@ M.setup = function(opts)
 	-- Set the options as global variables in the module
 	terminal_direction = opts.terminal_direction
 	python_env_search_paths = vim.deepcopy(opts.search_paths or {})
-	vim.notify("We now have " .. #python_env_search_paths .. " search paths for Python envs stored")
 	add_miniconda = opts.add_miniconda
 	add_system_path = opts.add_system_path
 end
---TODO: check the entire find Python env logic
 
 M.repl_running = function()
 	return ipy_term ~= nil
