@@ -194,8 +194,8 @@ M.find_python_envs_on_windows = function(search_paths)
 	return envs
 end
 
-M.find_python_envs = function()
-	vim.notify("Searching for Python environments...")
+M.find_python_envs = function(search_paths)
+	vim.notify("Searching for Python environments with " .. #python_env_search_paths .. " search paths")
 	if is_windows then
 		return M.find_python_envs_on_windows(search_paths)
 	else
