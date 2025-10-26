@@ -197,9 +197,9 @@ end
 M.find_python_envs = function()
 	vim.notify("Searching for Python environments...")
 	if is_windows then
-		return M.find_python_envs_on_windows(python_env_search_paths)
+		return M.find_python_envs_on_windows(search_paths)
 	else
-		return M.find_python_envs_on_linux(python_env_search_paths)
+		return M.find_python_envs_on_linux(search_paths)
 	end
 end
 
@@ -250,7 +250,7 @@ M.pick_python_env = function()
 	-- Find python executables in common locations
 	if not python_envs then
 		vim.notify("None found yet, searching now...")
-		python_envs = M.find_python_envs()
+		python_envs = M.find_python_envs(python_env_search_paths)
 	end
 	pickers
 		.new({}, {
