@@ -1,11 +1,8 @@
 local M = {}
 -- Check if the OS is Windows
----@diagnostic disable-next-line: undefined-field
 local is_windows = vim.loop.os_uname().version:match("Windows")
 -- Stores the ipython terminal instance
 local ipy_term = nil
--- Stores the preferred Python environment
-local current_python_env = nil
 -- Stores list with all Python environments
 local python_envs = nil
 -- Helpers for blinking text to be sent to the terminal
@@ -13,6 +10,8 @@ local blink = require("togglepy.blink")
 local helpers = require("togglepy.helpers")
 -- Local variable to store preferred terminal direction
 local terminal_direction = "vertical"
+-- Stores the preferred Python environment
+local current_python_env = nil
 -- Default search paths for Python environments on Linux/MacOS
 local python_env_search_paths = {}
 local add_miniconda = true
@@ -151,8 +150,6 @@ M.find_python_envs_on_windows = function(search_paths)
 	end
 	-- Initialize candidate folders to search for python executables
 	search_paths = search_paths or {}
-	-- TODO: continue here, why is this one set to 0 paths?
-	vim.notify("Searching Python environments in " .. #search_paths .. " paths")
 	-- Add miniconda paths
 	if add_miniconda then
 		-- Add all miniconda3 folders to search paths
@@ -188,16 +185,13 @@ M.find_python_envs_on_windows = function(search_paths)
 			handle:close()
 		end
 	end
-	vim.notify("Found " .. tostring(#envs) .. " Python environments")
-	return envs
+	return helpers.drop_duplicates(envs)
 end
 
 M.find_python_envs = function(search_paths)
 	if is_windows then
-		vim.notify("Searching for Python environments on windows with " .. #python_env_search_paths .. " search paths")
 		return M.find_python_envs_on_windows(search_paths)
 	else
-		vim.notify("Searching for Python environments on Linux with " .. #python_env_search_paths .. " search paths")
 		return M.find_python_envs_on_linux(search_paths)
 	end
 end
@@ -227,7 +221,7 @@ M.pick_python_env_async = function()
 							actions.close(prompt_bufnr)
 							local selection = action_state.get_selected_entry()
 							current_python_env = selection[1]
-							vim.notify("Selected Python: " .. current_python_env)
+							vim.notify("Selected Python: " .. current_python_env, vim.log.levels.INFO)
 						end)
 						return true
 					end,
@@ -245,10 +239,8 @@ M.pick_python_env = function()
 	local actions = require("telescope.actions")
 	local action_state = require("telescope.actions.state")
 	local conf = require("telescope.config").values
-	vim.notify("Preparing Python environments...")
 	-- Find python executables in common locations
 	if not python_envs then
-		vim.notify("Searching for Python environments with " .. #python_env_search_paths .. " search paths")
 		python_envs = M.find_python_envs(python_env_search_paths)
 	end
 	pickers
@@ -261,7 +253,7 @@ M.pick_python_env = function()
 					actions.close(prompt_bufnr)
 					local selection = action_state.get_selected_entry()
 					current_python_env = selection[1]
-					vim.notify("Selected Python: " .. current_python_env)
+					vim.notify("Selected Python: " .. current_python_env, vim.log.levels.INFO)
 				end)
 				return true
 			end,
@@ -302,7 +294,7 @@ end, { desc = "Pick Python environment" })
 -- Create a command to clear Python environments
 vim.api.nvim_create_user_command("TogglePyClearEnvs", function()
 	python_envs = nil
-	vim.notify("Cleared Python environments")
+	vim.notify("Cleared Python environments", vim.log.levels.INFO)
 end, { desc = "Clear Python environments" })
 -- Create a command to toggle the IPython terminal
 vim.api.nvim_create_user_command("TogglePyTerminal", function()
@@ -315,7 +307,7 @@ vim.api.nvim_create_user_command("TogglePySwitchTerminalDirection", function()
 	else
 		terminal_direction = "float"
 	end
-	vim.notify("Terminal direction set to: " .. terminal_direction)
+	vim.notify("Terminal direction set to: " .. terminal_direction, vim.log.levels.INFO)
 end, { desc = "Switch terminal split direction" })
 
 -- These commands should only be available for Python files
