@@ -113,7 +113,6 @@ M.run_python_file_in_ipython_terminal = function()
 	-- ipy_term:send("\x15" .. string.format("%%run %s", file), false)
 end
 
--- TODO: test this logic
 M.find_python_envs_on_linux = function(search_paths)
 	-- Check if the OS is not Windows
 	if is_windows then
@@ -204,14 +203,13 @@ M.find_python_envs = function()
 	end
 end
 
--- TODO test this one
+-- TODO test this one, not used yet
 M.pick_python_env_async = function()
 	local pickers = require("telescope.pickers")
 	local finders = require("telescope.finders")
 	local actions = require("telescope.actions")
 	local action_state = require("telescope.actions.state")
 	local conf = require("telescope.config").values
-
 	local search_cmd =
 		[[which -a python python3 2>/dev/null; find -L ~/.pyenv/versions ~/.conda/envs ~/anaconda3/envs -type f -name python 2>/dev/null]]
 	vim.system({ "bash", "-c", search_cmd }, { text = true }, function(obj)
@@ -278,7 +276,6 @@ M.in_debug_mode = function()
 		return false
 	end
 	local lines = vim.api.nvim_buf_get_lines(ipy_term.bufnr, 0, -1, false)
-	-- for i = math.max(1, #lines - 10), #lines do
 	for i = #lines, 1, -1 do
 		local line = lines[i]
 		if line and line:match("%(Pdb%)") then
