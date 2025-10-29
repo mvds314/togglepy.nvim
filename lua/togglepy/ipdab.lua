@@ -13,6 +13,16 @@ function M.setup(opts)
 		return
 	end
 
+	local dapui_ok, dapui = pcall(require, "dapui")
+	if not dapui_ok then
+		vim.notify("nvim-dap-ui is required for togglepy.nvim", vim.log.levels.ERROR)
+		return
+	end
+	-- Save the original dapui configuration
+	local dapui_config_layouts = vim.deepcopy(require("dapui.config").layouts)
+	-- vim.notify("Current dapui layouts: " .. vim.inspect(dapui_config_layouts), vim.log.levels.INFO)
+	-- TODO: just copy the fields manually
+
 	dap.adapters.ipdb = {
 		type = "server",
 		host = opts.host,
