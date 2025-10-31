@@ -126,4 +126,76 @@ end
 ### Summary
 By using `dap.listeners` and dynamically adjusting the `dapui` setup, you can customize the components and layouts shown in `nvim-dap-ui` for each configuration. This allows you to tailor the debugging experience to the specific needs of each configuration.
 
+I put some switching logic in place for the dapui config. What events should I use, I also want to put it back after debugging. How do I do that?
+
+# Copilot (978bb6f5-9d4f-47a6-b3d4-82364ba97f78) ───
+
+To implement switching logic for `dapui` configuration and ensure it reverts back after debugging, you can use the following `nvim-dap` events:
+
+### Events to Use:
+1. **`event_initialized`**: Triggered when a debugging session starts. Use this to apply your custom `dapui` configuration.
+2. **`event_terminated`**: Triggered when the debugging session ends. Use this to revert the `dapui` configuration to its original state.
+3. **`event_exited`**: Triggered when the debugging session exits. Also use this to revert the configuration.
+
+### Implementation:
+You can use `dap.listeners` to hook into these events and dynamically adjust the `dapui` configuration.
+
+Here’s an example:
+
+```lua
+local dap = require("dap")
+local dapui = require("dapui")
+
+-- Save the original dapui configuration
+local original_config = vim.deepcopy(require("dapui.config"))
+
+-- Define custom configurations for specific debugging scenarios
+local custom_configs = {
+  ["Attach to ipdb (manual %run)"] = {
+    layouts = {
+      {
+        elements = { "scopes", "watches" },
+        size = 40,
+        position = "left",
+      },
+      {
+        elements = { "repl" },
+        size = 10,
+        position = "bottom",
+      },
+    },
+  },
+}
+
+-- Listener for when debugging starts
+dap.listeners.after.event_initialized["dapui_config"] = function()
+  local config = dap.session().config
+  local custom_config = custom_configs[config.name]
+  if custom_config then
+    dapui.setup(custom_config)
+  end
+  dapui.open()
+end
+
+-- Listener for when debugging ends
+local function reset_dapui()
+  dapui.setup(original_config)
+  dapui.close()
+end
+
+dap.listeners.before.event_terminated["dapui_config"] = reset_dapui
+dap.listeners.before.event_exited["dapui_config"] = reset_dapui
+```
+
+### Explanation:
+1. **Save Original Configuration**: The `original_config` is saved using `vim.deepcopy` to ensure you can revert to the default state.
+2. **Custom Configurations**: Define `custom_configs` for specific debugging scenarios.
+3. **Apply Custom Configurations**: Use `event_initialized` to detect the start of a debugging session and apply the appropriate configuration.
+4. **Revert to Original Configuration**: Use `event_terminated` and `event_exited` to revert the configuration and close `dapui` when debugging ends.
+
+### Notes:
+- Ensure `dapui.setup` is called with the correct configuration before opening or closing `dapui`.
+- Use `vim.deepcopy` to avoid modifying the original configuration directly.
+- Test the logic with different debugging configurations to ensure it behaves as expected.
+
 
