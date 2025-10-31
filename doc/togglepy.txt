@@ -139,7 +139,7 @@ toggleterm.nvim configuration:
   it does not exist yet, or hides/unhides it if it does.
 * `:TogglePyRunFile`: Saves all buffers, changes the working directory in the repl
   to the location of the file, and runs the current Python file in the ipython
-  REPL using the magic `%run your_script.py`.
+  REPL using the magic `%run -i your_script.py`.
 * `:TogglePyPickEnv`: Search for Python environments on your system and uses
   telescope.nvim to pick a Python virtual environment.
 * `:TogglePyClearEnvs`: Clears the list of found Python virtual environments.
@@ -156,7 +156,7 @@ for all REPL interactions. Most often, it might be the only toggleterm
 terminal you use, in which case you can hide/unhide to it with `<C-\>`. Single
 lines or selections can be send to the terminal with <F9>. Your file can be
 executed with <F5>, which which will create terminal if it does not exist yet,
-and runs your script with the ipython magic `%run your_script.py`.
+and runs your script with the ipython magic `%run -i your_script.py`.
 
 By default the terminal will start in the Python environment as available at
 the prompt where Neovim is started. You can also switch to another virtual

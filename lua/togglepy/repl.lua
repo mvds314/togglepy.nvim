@@ -104,8 +104,8 @@ M.run_python_file_in_ipython_terminal = function()
 	local file_dir = vim.fn.fnamemodify(file, ":h")
 	ipy_term:send("\x15" .. string.format('cd "%s"', file_dir), true)
 	local file_basename = vim.fn.fnamemodify(file, ":t")
-	ipy_term:send("\x15" .. string.format("%%run %s", file_basename), true)
-	-- ipy_term:send("\x15" .. string.format("%%run %s", file), false)
+	ipy_term:send("\x15" .. string.format("%%run -i %s", file_basename), true)
+	-- ipy_term:send("\x15" .. string.format("%%run -i %s", file), false)
 end
 
 M.find_python_envs_on_linux = function(search_paths)
