@@ -91,6 +91,6 @@ function M.setup(opts)
 	})
 end
 
--- TODO: configure the DAPui look and feel for this option
+-- TODO: test dapui config switcher with rust debugger
 
 return M
