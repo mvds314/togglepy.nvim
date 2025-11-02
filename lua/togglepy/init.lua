@@ -20,7 +20,6 @@ function M.setup(opts)
 	require("togglepy.keymaps").setup(keymap_opts)
 end
 
--- TODO: update documentation for the plugin
 M.version = "25.11.1"
 
 return M

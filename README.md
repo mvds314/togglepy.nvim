@@ -156,6 +156,7 @@ Contributions are welcome! Please open issues or pull requests on the GitHub rep
 
 ### TODOs
 
+- [ ] Update documenatation
 - [ ] Add tests
 - [ ] Fix bug, when term exits ipy_term is not cleared
 - [ ] Create a mapping for debugging Python files with ipython
