@@ -54,7 +54,10 @@ require("lazy").setup({
   },
   config = function()
     local opts = { ipdab = { host = "localhost", port = 9000 },
-                   repl = { terminal_direction = "vertical" },
+                   repl = { terminal_direction = "vertical",
+                            search_paths = {},
+                            add_miniconda = true,
+                            add_system_path = true,},
                    keymaps = { window_navigation = true,
                                send_key = "<F9>",
                                run_key = "<F5>",
@@ -72,6 +75,9 @@ The `opts` table can contains options for the different components of the plugin
 - `host`: IP address where the DAP server should listen (default: `"localhost"`).
 - `port`: Port where the DAP server should listen (default: `9000`).
 - `terminal_direction`: Direction of the REPL terminal, either `"float"` or `"vertical"` (default: `"vertical"`).
+- `search_paths`: List of paths to search for Python virtual environments.
+- `add_miniconda`: Whether to include Miniconda environments in the search (default: `true`).
+- `add_system_path`: Whether to include the system Python environment in the search (default:
 - `window_navigation`: Whether to set up window navigation keymaps, i.e., '<C-w>h/j/k/l' for terminal mode
 - `send_key`: Key to send the current line or visual selection to the REPL (default: `<F9>`).
 - `run_key`: Key to run the current Python file in the REPL or to continue in debug mode (default: `<F5>`).

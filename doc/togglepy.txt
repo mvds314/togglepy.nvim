@@ -64,10 +64,11 @@ Set up with Lazy.nvim as follows
                'mfussenegger/nvim-dap',
                'rcarriga/nvim-dap-ui',},
    config = function()
-                -- TODO: add configuration options
-                local opts = {host="localhost", port=9000}
                 local opts = { ipdab = { host = "localhost", port = 9000 },
-                               repl = { terminal_direction = "vertical" },
+                               repl = { terminal_direction = "vertical",
+                                        search_paths = {},
+                                        add_miniconda = true,
+                                        add_system_path = true,},
                                keymaps = { window_navigation = true,
                                            send_key = "<F9>",
                                            run_key = "<F5>",
@@ -90,6 +91,12 @@ When empty or not passed, the default values as passed above are used.
   following fields:
   - `terminal_direction`: Direction of the REPL terminal, either `"float"` or
     `"vertical"`. Default is `"vertical"`.
+  - `search_paths`: A list of paths where to search for Python virtual
+    environments. Default is an empty list.
+  - `add_miniconda`: Whether to search for virtual environments in the
+    Miniconda installation directory. Default is `true`.
+  - `add_system_path`: Whether to search for virtual environments in the
+    system Python installation directories. Default is `true`.
 * 'keymaps': A table with keymaps for REPL and debugging. It can contain the
   following fields:
   - `window_navigation`: Whether to set up window navigation keymaps, i.e.,
