@@ -140,7 +140,6 @@ M.find_python_envs_on_linux = function(search_paths)
 	return helpers.drop_duplicates(envs)
 end
 
--- TODO: test this logic
 M.find_python_envs_on_windows = function(search_paths)
 	-- Check if the OS is Windows
 	if not is_windows then
