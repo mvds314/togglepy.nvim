@@ -53,7 +53,7 @@ end
 M.create_or_get_ipython_terminal = function(cmd)
 	local Terminal = require("toggleterm.terminal").Terminal
 	if not cmd then
-		local python_env = current_python_env or "python"
+		local python_env = vim.fn.expand(current_python_env or "python")
 		-- Ignore IPython warnings about running inside a virtual environment
 		cmd = string.format('"%s" -W "ignore:.*interactiveshell.py:UserWarning" -m IPython', python_env)
 	end
@@ -95,14 +95,18 @@ M.run_python_file_in_ipython_terminal = function()
 		return
 	end
 	-- Ignore IPython warnings about running inside a virtual environment
-	local python_env = current_python_env or "python"
+	local python_env = vim.fn.expand(current_python_env or "python")
 	local cmd = string.format('"%s" -W "ignore:.*interactiveshell.py:UserWarning" -m IPython', python_env)
 	ipy_term = M.create_or_get_ipython_terminal(cmd)
 	file = string.gsub(file, "[\r\n]+$", "")
 	-- Note we clear the current line first by sending Ctrl+U, represented by \x15
 	-- Change to the file's directory before running
 	local file_dir = vim.fn.fnamemodify(file, ":h")
-	ipy_term:send("\x15" .. string.format('cd "%s"', file_dir), true)
+	if not is_windows then
+		-- Replace expanded home folder by ~
+		file_dir = file_dir:gsub(vim.fn.expand("~"), "~")
+	end
+	ipy_term:send("\x15" .. string.format('%%cd -q "%s"', file_dir), true)
 	local file_basename = vim.fn.fnamemodify(file, ":t")
 	ipy_term:send("\x15" .. string.format("%%run -i %s", file_basename), true)
 	-- ipy_term:send("\x15" .. string.format("%%run -i %s", file), false)
@@ -133,6 +137,8 @@ M.find_python_envs_on_linux = function(search_paths)
 	local envs = {}
 	if linux_handle then
 		for line in linux_handle:lines() do
+			-- Replace expanded home paths by ~
+			line = line:gsub(vim.fn.expand("~"), "~")
 			table.insert(envs, line)
 		end
 		linux_handle:close()

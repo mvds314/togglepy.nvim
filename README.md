@@ -6,7 +6,7 @@ A REPL for Python based on toggleterm.nvim.
 
 `togglepy.nvim` is a Neovim plugin that provides a REPL-based workflow for Python, similar to the scientific programming development environments of MATLAB, R, and Python's Spyder IDE.
 
-TODO: insert GIF showing the workflow
+[![asciicast](https://asciinema.org/a/xa82iCuP4zRPSJ10l4Trydx05.svg)](https://asciinema.org/a/xa82iCuP4zRPSJ10l4Trydx05)
 
 ### Features
 
