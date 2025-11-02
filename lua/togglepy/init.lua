@@ -1,4 +1,5 @@
 local M = {}
+
 --Auto load setup with default options if setup not called
 local _setup_called = false
 
@@ -20,5 +21,6 @@ function M.setup(opts)
 end
 
 -- TODO: update documentation for the plugin
+M.version = "25.11.1"
 
 return M
