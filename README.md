@@ -162,6 +162,7 @@ Contributions are welcome! Please open issues or pull requests on the GitHub rep
 
 ### TODOs
 
+- [ ] Fix DAB ui config switcher issue
 - [x] Update documenatation
 - [ ] Add tests
 - [ ] Fix bug, when term exits ipy_term is not cleared

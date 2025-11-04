@@ -91,6 +91,4 @@ function M.setup(opts)
 	})
 end
 
--- TODO: test dapui config switcher with rust debugger
-
 return M
