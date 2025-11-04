@@ -30,7 +30,6 @@ local function reset_dapui()
 		dapui.setup(original_dapui_config)
 		original_dapui_config = nil
 	end
-	dapui.close()
 end
 
 function M.setup(opts)
@@ -53,7 +52,7 @@ function M.setup(opts)
 		return
 	end
 	-- Set listeners to change the dapui layout based on the configuration used
-	dap.listeners.after.event_initialized["dapui_config"] = function()
+	dap.listeners.after.event_initialized["ipdab_dapui_config"] = function()
 		-- Store the original config globally, and temporarily switch to a modified one
 		local config = dap.session().config
 		if config.name == "Attach to ipdb (manual %run)" then
@@ -68,11 +67,10 @@ function M.setup(opts)
 			dapui.setup(original_dapui_config)
 			original_dapui_config = nil
 		end
-		dapui.open()
 	end
 
-	dap.listeners.before.event_terminated["dapui_config"] = reset_dapui
-	dap.listeners.before.event_exited["dapui_config"] = reset_dapui
+	dap.listeners.before.event_terminated["ipdab_dapui_config"] = reset_dapui
+	dap.listeners.before.event_exited["ipdab_dapui_config"] = reset_dapui
 
 	dap.adapters.ipdb = {
 		type = "server",
