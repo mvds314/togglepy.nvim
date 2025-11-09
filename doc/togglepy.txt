@@ -151,8 +151,8 @@ toggleterm.nvim configuration:
   telescope.nvim to pick a Python virtual environment.
 * `:TogglePyClearEnvs`: Clears the list of found Python virtual environments.
 * `:TogglePySwitchTerminalDirection`: Switches the direction of the
-  ipython REPL terminal between `float`, and `vertical`. Requires a restart of
-  the REPL.
+  ipython REPL terminal between `float` (default for small windows), and `vertical`
+  (default for largers windows). Requires a restart of the REPL.
 
 5. How it works                                       *togglepy-how*
 

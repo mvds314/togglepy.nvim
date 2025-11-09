@@ -19,17 +19,14 @@ local add_system_path = true
 
 M.setup = function(opts)
 	-- Default options
-	-- Continue here: the problem is that no opts seem to be passed
-	for k, v in ipairs(opts) do
-		vim.notify("Option " .. k .. " = " .. tostring(v))
+	local defaults = { search_paths = {}, add_miniconda = true, add_system_path = true }
+	-- Set default terminal direction based on window width
+	if vim.o.columns < 180 then
+		defaults.terminal_direction = "float"
+	else
+		defaults.terminal_direction = "vertical"
 	end
-	-- vim.notify("TogglePy setup called with " .. #opts.search_paths .. " search paths")
-	opts = vim.tbl_deep_extend("force", {
-		terminal_direction = "vertical",
-		search_paths = {},
-		add_miniconda = true,
-		add_system_path = true,
-	}, opts or {})
+	opts = vim.tbl_deep_extend("force", defaults, opts or {})
 	-- Set the options as global variables in the module
 	terminal_direction = opts.terminal_direction
 	python_env_search_paths = vim.deepcopy(opts.search_paths or {})
