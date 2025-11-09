@@ -71,6 +71,16 @@ function M.setup(opts)
 
 	dap.listeners.before.event_terminated["ipdab_dapui_config"] = reset_dapui
 	dap.listeners.before.event_exited["ipdab_dapui_config"] = reset_dapui
+	dap.listeners.after.event_stopped["ipdab_retain_terminal_focus"] = function()
+		local repl = require("togglepy.repl")
+		if repl.ipy_term_has_focus() then
+			vim.schedule(function()
+				-- TODO: continue here, this does not work yet
+				-- Reproduce, debug, attach dap, type next in terminal, focus of terminal is lost
+				repl.switch_to_ipy_term()
+			end)
+		end
+	end
 
 	dap.adapters.ipdb = {
 		type = "server",

@@ -285,6 +285,16 @@ M.in_debug_mode = function()
 	return false
 end
 
+M.ipy_term_has_focus = function()
+	return ipy_term and ipy_term:is_open() and vim.api.nvim_get_current_win() == ipy_term.window
+end
+
+M.switch_to_ipy_term = function()
+	if ipy_term then
+		vim.api.nvim_set_current_win(ipy_term.window)
+	end
+end
+
 -------------------------------- Set up commands --------------------------------
 
 -- Create a command to pick Python environments
