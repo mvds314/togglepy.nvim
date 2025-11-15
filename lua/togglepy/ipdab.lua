@@ -77,6 +77,8 @@ function M.setup(opts)
 			vim.schedule(function()
 				-- TODO: continue here, this does not work yet
 				-- Reproduce, debug, attach dap, type next in terminal, focus of terminal is lost
+				-- I don't think this really get executed at all
+				-- the problem is that the window get focus even when the terminal has on a breakpoint ->
 				repl.switch_to_ipy_term()
 			end)
 		end
