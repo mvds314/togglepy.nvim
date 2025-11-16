@@ -74,10 +74,10 @@ function M.setup(opts)
 	dap.listeners.after.event_stopped["ipdab_retain_terminal_focus"] = function()
 		local repl = require("togglepy.repl")
 		-- TODO: remove notify
-		vim.notify("Stopped event received, checking terminal focus")
+		vim.notify("After stopped event received, checking to retain focus")
 		if repl.ipy_term_has_focus() then
 			--TODO: remove notify
-			vim.notify("Retaining focus on IPython terminal")
+			vim.notify("Terminal has focus, scheduling to retail it")
 			vim.schedule(function()
 				-- TODO: continue here, this does not work yet
 				-- Reproduce, debug, attach dap, type next in terminal, focus of terminal is lost
