@@ -40,7 +40,7 @@ end
 
 M.send = function(cmd, go_back)
 	if not ipy_term then
-		vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+		vim.notify("Trying to send command <" .. cmd .. "> but IPython terminal is not open", vim.log.levels.WARN)
 		return
 	else
 		ipy_term:send(cmd, go_back)
@@ -263,7 +263,6 @@ end
 
 M.in_debug_mode = function()
 	if not ipy_term or not ipy_term.bufnr then
-		vim.notify("IPython terminal is not open", vim.log.levels.WARN)
 		return false
 	end
 	local lines = vim.api.nvim_buf_get_lines(ipy_term.bufnr, 0, -1, false)
@@ -349,7 +348,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		-- Debug continue
 		vim.api.nvim_create_user_command("TogglePyDebugContinue", function()
 			if not M.repl_running() then
-				vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+				vim.notify("Trying to continue debuggin, but IPython terminal is not open", vim.log.levels.WARN)
 				return
 			elseif not M.in_debug_mode() then
 				vim.notify("Not in debug mode", vim.log.levels.WARN)
@@ -360,7 +359,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		-- Debug next
 		vim.api.nvim_create_user_command("TogglePyDebugNext", function()
 			if not M.repl_running() then
-				vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+				vim.notify("Trying to step over, but IPython terminal is not open", vim.log.levels.WARN)
 				return
 			elseif not M.in_debug_mode() then
 				vim.notify("Not in debug mode", vim.log.levels.WARN)
@@ -371,7 +370,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		-- Debug step
 		vim.api.nvim_create_user_command("TogglePyDebugStep", function()
 			if not M.repl_running() then
-				vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+				vim.notify("Trying to debug step into, but IPython terminal is not open", vim.log.levels.WARN)
 				return
 			elseif not M.in_debug_mode() then
 				vim.notify("Not in debug mode", vim.log.levels.WARN)
@@ -382,7 +381,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		-- Debug return
 		vim.api.nvim_create_user_command("TogglePyDebugReturn", function()
 			if not M.repl_running() then
-				vim.notify("IPython terminal is not open", vim.log.levels.WARN)
+				vim.notify("Trying to debug step out, but IPython terminal is not open", vim.log.levels.WARN)
 				return
 			elseif not M.in_debug_mode() then
 				vim.notify("Not in debug mode", vim.log.levels.WARN)
