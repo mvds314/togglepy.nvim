@@ -88,6 +88,7 @@ function M.setup(opts)
 				-- Then test it with a floating terminal
 				-- I don't understand why this logic is not correct
 				-- Debug all the listeners, i.e., write custom listeners, and see when the focus is lost
+				-- What I also don't understand is that on each break this code seems to run twice
 				-- require("togglepy.repl").switch_to_ipy_term()
 				repl.switch_to_ipy_term()
 			end)
