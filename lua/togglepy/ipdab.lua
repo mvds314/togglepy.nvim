@@ -73,12 +73,20 @@ function M.setup(opts)
 	dap.listeners.before.event_exited["ipdab_dapui_config"] = reset_dapui
 	dap.listeners.after.event_stopped["ipdab_retain_terminal_focus"] = function()
 		local repl = require("togglepy.repl")
+		-- TODO: remove notify
+		vim.notify("Stopped event received, checking terminal focus")
 		if repl.ipy_term_has_focus() then
+			--TODO: remove notify
+			vim.notify("Retaining focus on IPython terminal")
 			vim.schedule(function()
 				-- TODO: continue here, this does not work yet
 				-- Reproduce, debug, attach dap, type next in terminal, focus of terminal is lost
-				-- I don't think this really get executed at all
 				-- the problem is that the window get focus even when the terminal has on a breakpoint ->
+				-- TODO: continue here like this
+				-- this seems to get executed, but the terminal still loses focus -> test separately using the commented command below
+				-- Test this with a sidepane terminal first
+				-- Then test it with a floating terminal
+				require("togglepy.repl").switch_to_ipy_term()
 				repl.switch_to_ipy_term()
 			end)
 		end

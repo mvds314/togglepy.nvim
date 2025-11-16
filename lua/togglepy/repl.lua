@@ -290,7 +290,12 @@ end
 
 M.switch_to_ipy_term = function()
 	if ipy_term then
+		-- TODO: remove this
+		vim.notify("Switching focus to IPython terminal", vim.log.levels.INFO)
 		vim.api.nvim_set_current_win(ipy_term.window)
+	else
+		-- TODO: remove this
+		vim.notify("Not switching to IPython terminal, as it is not open", vim.log.levels.WARN)
 	end
 end
 
