@@ -23,14 +23,14 @@ function M.setup(opts)
 			vim.schedule(function()
 				-- TODO: continue here, this does not work yet
 				-- Reproduce, debug, attach dap, type next in terminal, focus of terminal is lost
-				-- the problem is that the window get focus even when the terminal has on a breakpoint ->
+				-- the problem is that the window gets focus even when the terminal has on a breakpoint ->
 				-- TODO: continue here like this
 				-- this seems to get executed, but the terminal still loses focus -> test separately using the commented command below
 				-- Test this with a sidepane terminal first
 				-- Then test it with a floating terminal
 				-- I don't understand why this logic is not correct
 				-- Debug all the listeners, i.e., write custom listeners, and see when the focus is lost
-				-- What I also don't understand is that on each break this code seems to run twice
+				-- What I also don't understand is that on each break this code seems to run twice -> this is due to double stop notification
 				-- require("togglepy.repl").switch_to_ipy_term()
 				repl.switch_to_ipy_term()
 			end)
