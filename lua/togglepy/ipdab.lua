@@ -118,7 +118,7 @@ function M.setup(opts)
 		end
 	end
 
-	dap.adapters.ipdb = {
+	dap.adapters.ipdab = {
 		type = "server",
 		host = opts.host,
 		port = opts.port,
@@ -126,8 +126,8 @@ function M.setup(opts)
 
 	dap.configurations.python = dap.configurations.python or {}
 	table.insert(dap.configurations.python, {
-		name = "Attach to ipdb (manual %run)",
-		type = "ipdb",
+		name = "Attach to ipdab (manual %run)",
+		type = "ipdab",
 		request = "launch", -- important to say launch here!
 		program = "${file}",
 		justMyCode = false,
