@@ -1,5 +1,6 @@
 local M = {}
 -- Check if the OS is Windows
+---@diagnostic disable-next-line: undefined-field
 local is_windows = vim.loop.os_uname().version:match("Windows")
 -- Stores the ipython terminal instance
 local ipy_term = nil
