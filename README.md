@@ -186,6 +186,7 @@ Contributions are welcome! Please open issues or pull requests on the GitHub rep
 
 - [x] Fix DAB ui config switcher issue
 - [x] Update documenatation
+- [ ] Fix F9 selection mapping
 - [ ] Add tests
 - [ ] Fix bug, when term exits ipy_term is not cleared
 - [ ] Create a mapping for debugging Python files with ipython

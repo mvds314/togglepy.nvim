@@ -101,6 +101,7 @@ function M.setup(opts)
 							end
 						end
 						-- Get the visual selection range
+						-- TODO: fix this, when the entire line is selected up to after the last character, this one fails
 						local start_pos = vim.fn.getpos("v")
 						local end_pos = vim.fn.getpos(".")
 						if start_pos[2] > end_pos[2] or (start_pos[2] == end_pos[2] and start_pos[3] > end_pos[3]) then
