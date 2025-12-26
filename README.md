@@ -186,7 +186,7 @@ Contributions are welcome! Please open issues or pull requests on the GitHub rep
 
 - [x] Fix DAB ui config switcher issue
 - [x] Update documenatation
-- [ ] Double check dapui and toggleterm config in documentation
+- [x] Double check dapui and toggleterm config in documentation
 - [ ] Fix F9 selection mapping
 - [ ] Round of switching logic -> abandon it if needed, it seems to complex
 - [ ] Add tests
