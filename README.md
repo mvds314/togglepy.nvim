@@ -112,6 +112,28 @@ require("lazy").setup({
 })
 ```
 
+When using `nvim-dap-ui.nvim`, it is recommended to disable it for this debug configuration.
+There are no particular conficts, but the idea recommended setup is to use the terminal for debugging instead of all the side panes.
+Adjust your `nvim-dap-ui` setup as follows:
+
+```lua
+{
+    "rcarriga/nvim-dap-ui",
+    config = function()
+      local dap = require "dap"
+      local dapui = require "dapui"
+      dapui.setup()
+      -- Only start dapui for other debug configurations
+      dap.listeners.after.event_initialized["default_dapui_config"] = function()
+        local config = dap.session().config
+        if config.name ~= "Attach to ipdab (manual %run)" then
+          dapui.open()
+        end
+      end
+    end,
+  },
+```
+
 ## How It Works
 
 When you open a Python file and use the `:TogglePyTerminal` command, a special `toggleterm` terminal is created that starts `ipython` by default. This terminal is remembered by `togglepy.nvim` until its buffer is closed and is used for all REPL interactions.
@@ -164,6 +186,9 @@ Contributions are welcome! Please open issues or pull requests on the GitHub rep
 
 - [x] Fix DAB ui config switcher issue
 - [x] Update documenatation
+- [x] Double check dapui and toggleterm config in documentation
+- [x] Fix F9 selection mapping
+- [ ] Round of switching logic -> abandon it if needed, it seems to complex
 - [ ] Add tests
 - [ ] Fix bug, when term exits ipy_term is not cleared
 - [ ] Create a mapping for debugging Python files with ipython
