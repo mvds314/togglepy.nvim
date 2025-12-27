@@ -101,7 +101,6 @@ function M.setup(opts)
 							end
 						end
 						-- Get the visual selection range
-						-- TODO: fix this, when the entire line is selected up to after the last character, this one fails
 						local start_pos = vim.fn.getpos("v")
 						local end_pos = vim.fn.getpos(".")
 						if start_pos[2] > end_pos[2] or (start_pos[2] == end_pos[2] and start_pos[3] > end_pos[3]) then
@@ -111,6 +110,9 @@ function M.setup(opts)
 						local start_col = start_pos[3] - 1
 						local end_line = end_pos[2] - 1
 						local end_col = end_pos[3]
+						-- Ensure end_col does not exceed the line length
+						local line_length = #vim.fn.getline(end_line + 1)
+						end_col = math.min(end_col, line_length)
 						-- blink the selection
 						blink.selection(50, start_line, end_line, start_col, end_col)
 						-- Send the visual selection to the REPL

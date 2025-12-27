@@ -187,7 +187,7 @@ Contributions are welcome! Please open issues or pull requests on the GitHub rep
 - [x] Fix DAB ui config switcher issue
 - [x] Update documenatation
 - [x] Double check dapui and toggleterm config in documentation
-- [ ] Fix F9 selection mapping
+- [x] Fix F9 selection mapping
 - [ ] Round of switching logic -> abandon it if needed, it seems to complex
 - [ ] Add tests
 - [ ] Fix bug, when term exits ipy_term is not cleared
