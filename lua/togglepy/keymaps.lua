@@ -9,6 +9,7 @@ function M.setup(opts)
 		window_navigation = true,
 		send_key = "<F9>",
 		run_key = "<F5>",
+		rerun_key = "<C-F5>",
 		next_key = "<F10>",
 		step_in_key = "<F11>",
 		step_out_key = "<F12>",
@@ -35,7 +36,7 @@ function M.setup(opts)
 							vim.cmd("TogglePyDebugContinue")
 						end
 					end, { buffer = buf, noremap = true, silent = true, desc = "Run/Continue" })
-					vim.keymap.set({ "n", "i", "v" }, "<C-F5>", function()
+					vim.keymap.set({ "n", "i", "v" }, rerun_key, function()
 						-- TODO: don't only check for debug mode, also check if ipdab is the debugger attached
 						if repl.in_debug_mode() then
 							local dap_ok, dap = pcall(require, "dap")
