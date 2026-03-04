@@ -35,6 +35,23 @@ function M.setup(opts)
 							vim.cmd("TogglePyDebugContinue")
 						end
 					end, { buffer = buf, noremap = true, silent = true, desc = "Run/Continue" })
+					vim.keymap.set({ "n", "i", "v" }, "<C-F5>", function()
+						if repl.in_debug_mode() then
+							local dap_ok, dap = pcall(require, "dap")
+							if dap_ok then
+								dap.terminate()
+							end
+							local dapui_ok, dapui = pcall(require, "dapui")
+							if dapui_ok then
+								dapui.close()
+							end
+						end
+						vim.cmd("TogglePyReset")
+						while repl.repl_running() do
+							vim.wait(100) -- Wait for 100ms before checking again
+						end
+						vim.cmd("TogglePyRunFile")
+					end, { buffer = buf, noremap = true, silent = true, desc = "ReRun" })
 				else
 					vim.notify("Buffer not found for key mapping " .. opts.run_key, vim.log.levels.ERROR)
 				end
