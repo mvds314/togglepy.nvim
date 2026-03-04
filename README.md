@@ -61,6 +61,7 @@ require("lazy").setup({
                    keymaps = { window_navigation = true,
                                send_key = "<F9>",
                                run_key = "<F5>",
+                               rerun_key= "<C-F5>",
                                next_key = "<F10>",
                                step_in_key = "<F11>",
                                step_out_key = "<F12>",},
@@ -145,12 +146,14 @@ When you open a Python file and use the `:TogglePyTerminal` command, a special `
 - `:TogglePyPickEnv`: Searches for Python environments on your system and allows you to pick one with `telescope.nvim`.
 - `:TogglePyClearEnvs`: Clears the list of found Python virtual environments.
 - `:TogglePySwitchTerminalDirection`: Switches the REPL terminal direction between `float` (default for small windows) and `vertical` (default for wide windows).
+- `:TogglePyReset`: Deletes the terminal buffer in which togglepy is running.
 
 ### Key Bindings
 
 - `<C-\>`: Toggle the REPL terminal.
 - `<F9>`: Send the current line or visual selection to the REPL.
 - `<F5>`: Run the current Python file in the REPL.
+- `<C-F5>`: Reset the REPL, close the ipdab debugging session, and run the current Python file in a new REPL.
 - `<F10>`: Step over in the debugger.
 - `<F11>`: Step into in the debugger.
 - `<S-F11>`: Step out/return in the debugger.
