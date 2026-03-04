@@ -36,6 +36,7 @@ function M.setup(opts)
 						end
 					end, { buffer = buf, noremap = true, silent = true, desc = "Run/Continue" })
 					vim.keymap.set({ "n", "i", "v" }, "<C-F5>", function()
+						-- TODO: don't only check for debug mode, also check if ipdab is the debugger attached
 						if repl.in_debug_mode() then
 							local dap_ok, dap = pcall(require, "dap")
 							if dap_ok then
