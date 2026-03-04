@@ -390,6 +390,16 @@ vim.api.nvim_create_autocmd("FileType", {
 				M.send("return", false)
 			end
 		end, { desc = "Debug return/step out" })
+		vim.api.nvim_create_user_command("TogglePyReset", function()
+			if ipy_term and ipy_term.bufnr then
+				if vim.api.nvim_buf_is_valid(ipy_term.bufnr) then
+					vim.api.nvim_buf_delete(ipy_term.bufnr, { force = true }) -- Use `force = true` to delete without saving
+				else
+					ipy_term = nil
+					vim.notify("IPython terminal was stored with invalid buffer number", vim.log.levels.ERROR)
+				end
+			end
+		end, { desc = "Reset and close the IPython terminal" })
 	end,
 })
 
