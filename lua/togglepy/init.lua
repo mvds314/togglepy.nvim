@@ -13,10 +13,8 @@ function M.setup(opts)
 	local ipdab_opts = opts.ipdab or {}
 	local repl_opts = opts.repl or {}
 	local keymap_opts = opts.keymaps or {}
-	-- local repl_opts = opts and opts.repl or {}
 	require("togglepy.ipdab").setup(ipdab_opts)
 	require("togglepy.repl").setup(repl_opts)
-	-- Pass the keymap options to the keymaps module
 	require("togglepy.keymaps").setup(keymap_opts)
 end
 
