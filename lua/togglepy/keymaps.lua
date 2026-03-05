@@ -36,7 +36,14 @@ function M.setup(opts)
 							vim.cmd("TogglePyDebugContinue")
 						end
 					end, { buffer = buf, noremap = true, silent = true, desc = "Run/Continue" })
-					vim.keymap.set({ "n", "i", "v" }, rerun_key, function()
+				else
+					vim.notify("Buffer not found for key mapping " .. opts.run_key, vim.log.levels.ERROR)
+				end
+			end
+			-- Define ReRun key mapping
+			if opts.rerun_key then
+				if buf then
+					vim.keymap.set({ "n", "i", "v" }, opts.rerun_key, function()
 						-- TODO: don't only check for debug mode, also check if ipdab is the debugger attached
 						if repl.in_debug_mode() then
 							local dap_ok, dap = pcall(require, "dap")
@@ -55,7 +62,7 @@ function M.setup(opts)
 						vim.cmd("TogglePyRunFile")
 					end, { buffer = buf, noremap = true, silent = true, desc = "ReRun" })
 				else
-					vim.notify("Buffer not found for key mapping " .. opts.run_key, vim.log.levels.ERROR)
+					vim.notify("Buffer not found for key mapping " .. opts.rerun_key, vim.log.levels.ERROR)
 				end
 			end
 			-- Define debug next key mapping
