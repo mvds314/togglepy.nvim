@@ -198,3 +198,4 @@ Contributions are welcome! Please open issues or pull requests on the GitHub rep
 - [ ] Consider to add switching environment logic to Telescope as a plugin
 - [ ] Put finding environments in a subprocess to avoid blocking Neovim
 - [ ] Make logic for multiple ipython terminals
+- [ ] Align vertical splits again (with ctr-w) after opening a terminal in the side pane, currently splits are moving
