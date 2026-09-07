@@ -13,6 +13,8 @@ function M.setup(opts)
 		next_key = "<F10>",
 		step_in_key = "<F11>",
 		step_out_key = "<F12>",
+		until_key = "<F6>",
+		breakpoint_key = "<F8>",
 	}, opts or {})
 	-- Key mappings for navigating between Python buffers and toggply's IPython terminal
 	vim.api.nvim_create_autocmd("FileType", {
@@ -93,6 +95,26 @@ function M.setup(opts)
 					end, { buffer = buf, noremap = true, silent = true, desc = "Step out/return" })
 				else
 					vim.notify("Buffer not found for key mapping " .. opts.step_out_key, vim.log.levels.ERROR)
+				end
+			end
+			-- Define run to cursor key mapping
+			if opts.until_key then
+				if buf then
+					vim.keymap.set("n", opts.until_key, function()
+						vim.cmd("TogglePyDebugUntil")
+					end, { buffer = buf, noremap = true, silent = true, desc = "Run to cursor" })
+				else
+					vim.notify("Buffer not found for key mapping " .. opts.until_key, vim.log.levels.ERROR)
+				end
+			end
+			-- Define toggle breakpoint key mapping
+			if opts.breakpoint_key then
+				if buf then
+					vim.keymap.set("n", opts.breakpoint_key, function()
+						vim.cmd("TogglePyToggleBreakpoint")
+					end, { buffer = buf, noremap = true, silent = true, desc = "Toggle breakpoint" })
+				else
+					vim.notify("Buffer not found for key mapping " .. opts.breakpoint_key, vim.log.levels.ERROR)
 				end
 			end
 			-- Define send to terminal mappings

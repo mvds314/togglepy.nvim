@@ -74,7 +74,9 @@ Set up with Lazy.nvim as follows
                                            run_key = "<F5>",
                                            next_key = "<F10>",
                                            step_in_key = "<F11>",
-                                           step_out_key = "<F12>",},
+                                           step_out_key = "<F12>",
+                                           until_key = "<F6>",
+                                           breakpoint_key = "<F8>",},
                     }
                 require('togglepy').setup(opts)
              end,
@@ -110,6 +112,10 @@ When empty or not passed, the default values as passed above are used.
     `<F11>`).
   - `step_out_key`: Key to step out/return in the debugger (default
     `<F12>`).
+  - `until_key`: Key to run to cursor, i.e., continue until the cursor's
+    line is reached (default `<F6>`).
+  - `breakpoint_key`: Key to toggle a breakpoint on the cursor's line
+    (default `<F8>`).
 
 For best integration, set up the <C-\> key mapping to toggle the REPL 
 with toggleterm. The following is an example configuration a decent

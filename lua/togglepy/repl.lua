@@ -285,6 +285,26 @@ M.in_debug_mode = function()
 	return false
 end
 
+-- Scans the terminal buffer for the most recent pdb/ipdb frame line, e.g.
+-- `> c:\path\to\file.py(12)func()`, and returns the file path it reports.
+-- Returns nil if no such line is found (e.g. debugger just started).
+M.get_current_debug_file = function()
+	if not ipy_term or not ipy_term.bufnr then
+		return nil
+	end
+	local lines = vim.api.nvim_buf_get_lines(ipy_term.bufnr, 0, -1, false)
+	for i = #lines, 1, -1 do
+		local line = lines[i]
+		if line then
+			local file = line:match("^> (.-)%(%d+%)")
+			if file then
+				return file
+			end
+		end
+	end
+	return nil
+end
+
 M.ipy_term_has_focus = function()
 	return ipy_term and ipy_term:is_open() and vim.api.nvim_get_current_win() == ipy_term.window
 end
@@ -390,6 +410,29 @@ vim.api.nvim_create_autocmd("FileType", {
 				M.send("return", false)
 			end
 		end, { desc = "Debug return/step out" })
+		-- Debug run to cursor: uses pdb/ipdb's built-in `until <lineno>` command to
+		-- continue execution until the cursor's line is reached (or the frame returns).
+		-- `until` only understands line numbers in the *current* frame's file, so if
+		-- the cursor is in a different file than the one currently executing, fall
+		-- back to a temporary breakpoint (`tbreak file:lineno` + `continue`) instead.
+		vim.api.nvim_create_user_command("TogglePyDebugUntil", function()
+			if not M.repl_running() then
+				vim.notify("Trying to run to cursor, but IPython terminal is not open", vim.log.levels.WARN)
+				return
+			elseif not M.in_debug_mode() then
+				vim.notify("Not in debug mode", vim.log.levels.WARN)
+			else
+				local lineno = vim.api.nvim_win_get_cursor(0)[1]
+				local cursor_file = vim.api.nvim_buf_get_name(0)
+				local debug_file = M.get_current_debug_file()
+				if debug_file and helpers.paths_equal(cursor_file, debug_file) then
+					M.send("until " .. lineno, false)
+				else
+					M.send("tbreak " .. cursor_file .. ":" .. lineno, false)
+					M.send("continue", false)
+				end
+			end
+		end, { desc = "Debug run to cursor" })
 		vim.api.nvim_create_user_command("TogglePyReset", function()
 			if ipy_term and ipy_term.bufnr then
 				if vim.api.nvim_buf_is_valid(ipy_term.bufnr) then
