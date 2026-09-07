@@ -64,7 +64,9 @@ require("lazy").setup({
                                rerun_key= "<C-F5>",
                                next_key = "<F10>",
                                step_in_key = "<F11>",
-                               step_out_key = "<F12>",},
+                               step_out_key = "<F12>",
+                               until_key = "<F6>",
+                               breakpoint_key = "<F8>",},
         }
     require('togglepy').setup(opts)
   end,
@@ -85,6 +87,8 @@ The `opts` table can contains options for the different components of the plugin
 - `next_key`: Key to step over in the debugger (default: `<F10>`).
 - `step_in_key`: Key to step into in the debugger (default: `<F11>`).
 - `step_out_key`: Key to step out/return in the debugger (default: `<F12>`).
+- `until_key`: Key to run to cursor (continue until the cursor's line is reached) in the debugger (default: `<F6>`).
+- `breakpoint_key`: Key to toggle a breakpoint on the cursor's line (default: `<F8>`).
 
 ### Recommended Configuration
 
@@ -157,6 +161,8 @@ When you open a Python file and use the `:TogglePyTerminal` command, a special `
 - `<F10>`: Step over in the debugger.
 - `<F11>`: Step into in the debugger.
 - `<S-F11>`: Step out/return in the debugger.
+- `<F6>`: Run to cursor in the debugger (continue until the cursor's line is reached, or the frame returns).
+- `<F8>`: Toggle a breakpoint on the current line.
 
 ### Debugging
 

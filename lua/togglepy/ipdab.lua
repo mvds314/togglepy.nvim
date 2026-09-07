@@ -30,6 +30,12 @@ function M.setup(opts)
 		justMyCode = false,
 		cwd = vim.fn.getcwd(),
 	})
+
+	-- Toggle breakpoint at the cursor's line, delegating to nvim-dap so
+	-- breakpoints are sent to ipdab via the DAP `setBreakpoints` request.
+	vim.api.nvim_create_user_command("TogglePyToggleBreakpoint", function()
+		dap.toggle_breakpoint()
+	end, { desc = "Toggle breakpoint" })
 end
 
 return M
