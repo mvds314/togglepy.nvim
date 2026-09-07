@@ -18,6 +18,6 @@ function M.setup(opts)
 	require("togglepy.keymaps").setup(keymap_opts)
 end
 
-M.version = "26.3.1"
+M.version = "26.9.1"
 
 return M
